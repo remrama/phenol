@@ -66,10 +66,10 @@ for ax, var in zip(axes.flat,DREAM_CHR_COLS):
         ax.set_yticklabels([])
     ax.grid(True,axis='y',which='major',linestyle='--',linewidth=.25,color='k',alpha=1)
 
-    # slope, intercept = resdf.loc[var,['slope','intercept']]
-    # x = pd.np.arange(1,11)
-    # line = slope*x+intercept
-    # ax.plot(x,line,color='k',linewidth=1)
+    slope, intercept = resdf.loc[var,['slope','intercept']]
+    x = pd.np.arange(1,11)
+    line = slope*x+intercept
+    ax.plot(x,line,color='k',linewidth=1)
 
 plt.tight_layout()
 
