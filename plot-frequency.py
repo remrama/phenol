@@ -56,8 +56,8 @@ ax.legend(handles=legend_patches,loc='upper right',
           frameon=True,bbox_to_anchor=(1.15,1.15))
 
 plt.tight_layout()
-for ext in ['png','svg','eps']:
-    .savefig(outfname.replace('tsv',ext))
+for ext in ['.png','.svg','.eps']:
+    plt.savefig(infname.replace('.tsv',f'-indiv{ext}'))
 plt.close()
 
 

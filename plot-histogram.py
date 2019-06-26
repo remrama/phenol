@@ -11,38 +11,34 @@ import matplotlib.pyplot as plt; plt.ion()
 
 import pyplotparams as myplt
 
-datadir = path.expanduser('~/IDrive-Sync/proj/phenol/data')
-resdir  = path.expanduser('~/IDrive-Sync/proj/phenol/results')
-
-infname = path.join(datadir,'data-clean.tsv')
-outfname = path.join(resdir,'dlq1-histogram.png')
+resdir = path.expanduser('~/IDrive-Sync/proj/phenol/results')
+infname = path.join(resdir,'dlq1-frequency.tsv')
 
 
 ########  load and manipulate data  ########
 
 df = pd.read_csv(infname,sep='\t')
 
-all_markers = list(matplotlib.markers.MarkerStyle.filled_markers)
-subjs = df['subj'].unique().tolist()
 
 
 
-xvals = []
-yvals = []
-markers = []
-counts = { x: 1 for x in [1,2,3,4,5] }
+# all_markers = list(matplotlib.markers.MarkerStyle.filled_markers)
+# subjs = df['subj'].tolist()
+# xvals = []
+# yvals = []
+# markers = []
+# counts = { x: 1 for x in [1,2,3,4,5] }
+# for _, row in df.iterrows():
+#     resp = row['DLQ:1']
+#     if not pd.np.isnan(resp):
+#         subj = row['subj']
+#         mark = all_markers[subjs.index(subj)]
+#         yval = counts[resp]
+#         counts[resp] += 1
 
-for _, row in df.iterrows():
-    resp = row['DLQ:1']
-    if not pd.np.isnan(resp):
-        subj = row['subj']
-        mark = all_markers[subjs.index(subj)]
-        yval = counts[resp]
-        counts[resp] += 1
-
-        xvals.append(resp)
-        yvals.append(yval)
-        markers.append(mark)
+#         xvals.append(resp)
+#         yvals.append(yval)
+#         markers.append(mark)
 
 
 
@@ -53,12 +49,11 @@ fig, ax = plt.subplots(figsize=(4,7))
 # for x, y, m in zip(xvals,yvals,markers):
 #     c = myplt.dlqcolor(x)
 #     ax.scatter(x,y,color=c,marker=m,edgecolors='k',linewidths=.5,s=85)
-
-ax.bar(1,24,edgecolor='k',width=1,linewidth=.5,color=myplt.dlqcolor(1))#,zorder=0,alpha=.8)
-ax.bar(2,11,edgecolor='k',width=1,linewidth=.5,color=myplt.dlqcolor(2))#,zorder=0,alpha=.8)
-ax.bar(3,4, edgecolor='k',width=1,linewidth=.5,color=myplt.dlqcolor(3))#,zorder=0,alpha=.8)
-ax.bar(4,9, edgecolor='k',width=1,linewidth=.5,color=myplt.dlqcolor(4))#,zorder=0,alpha=.8)
-ax.bar(5,4, edgecolor='k',width=1,linewidth=.5,color=myplt.dlqcolor(5))#,zorder=0,alpha=.8)
+DLQ_COLS = [ f'DLQ1_resp-{i}' for i in range(1,6) ]
+colors = [ myplt.dlqcolor(i) for i in range(1,6) ]
+xvals = range(1,6)
+yvals = df[DLQ_COLS].sum(axis=0).values
+ax.bar(xvals,yvals,color=colors,edgecolor='k',width=1,linewidth=.5)
 
 ax.set_xlim(.25,5.75)
 ax.set_ylim(0,max(yvals)+1)
@@ -75,7 +70,8 @@ ax.legend(handles=myplt.dlqpatches,loc='upper right',
           frameon=False)
 
 plt.tight_layout()
-plt.savefig(outfname)
-plt.savefig(outfname.replace('.png','.svg'))
+
+for ext in ['png','svg','eps']:
+    plt.savefig(infname.replace('tsv',ext))
 plt.close()
 
