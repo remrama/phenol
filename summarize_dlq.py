@@ -42,15 +42,11 @@ df = indf.melt(value_vars=DLQ_COLS,
 df['likert'] = pd.Categorical(df['likert'],categories=range(1,6),ordered=True)
 
 # make the contingency table
-outdf = pd.crosstab(df['probe'],df['likert'],dropna=False)
+cont_df = pd.crosstab(df['probe'],df['likert'],dropna=False)
 
 # drop extra layer for column index
-outdf.columns = [ f'likert-{x}' for x in outdf.columns ]
+cont_df.columns = [ f'likert-{x}' for x in cont_df.columns ]
 
-
-# # only keep main DLQ questions
-# excl_df = outdf.loc[DLQ_COLS[:12]]
-# stats.chi2_contingency(excl_df)
 
 # export contingency table
-outdf.to_csv(conttable_outfname,index=True,sep='\t')
+cont_df.to_csv(conttable_outfname,index=True,sep='\t')
