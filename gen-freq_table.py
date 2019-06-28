@@ -7,8 +7,8 @@ Exports tsv table.
 from os import path
 import pandas as pd
 
-datadir = path.expanduser('~/DBp/proj/phenol/data')
-resdir = path.expanduser('~/DBp/proj/phenol/results')
+datadir = path.expanduser('~/IDrive-Sync/proj/phenol/data')
+resdir = path.expanduser('~/IDrive-Sync/proj/phenol/results')
 
 infname = path.join(datadir,'data-clean.tsv')
 outfname = path.join(resdir,'dlq1-frequency.tsv')
