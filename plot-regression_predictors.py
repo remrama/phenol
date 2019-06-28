@@ -1,5 +1,6 @@
 """
-Plot MILD length by DLQ1.
+Plot DLQ1 by each of the regression model predictors.
+Each on its own axis.
 """
 
 from os import path
