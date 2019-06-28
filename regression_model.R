@@ -43,9 +43,12 @@ print(summary(model.fit))
 # get odds ratios by taking exponent of the coefficients
 # (makes coeffs interpretable)
 outdf <- exp(cbind(OddsRatio=coef(model.fit),confint(model.fit)))
+# add pvalue from regression model
+outdf <- cbind(outdf,pval=summary(model.fit)$coefficients[,"Pr(>|z|)"])
 # drop the useless stuff and export
 predictors = c("n_rcs","mildlength","wbtblength","bedtime_int")
 outdf <- outdf[predictors,]
+# export ordinal regression model
 outfname <- paste(resdir,"results_regression-coefficients.tsv",sep="/")
 write.table(outdf,file=outfname,row.names=TRUE,col.names=NA,sep="\t")
 
