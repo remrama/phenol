@@ -55,9 +55,6 @@ markers = dict(all='s',recalled='o',subjs='^')
 labels = dict(all='Proportion of all attempts',
               recalled='Proportion of recalled dreams',
               subjs='Proportion of subjects')
-axcolors = dict(all='darkgoldenrod',
-                recalled='darkgoldenrod',
-                subjs='forestgreen')
 # append total to the labels
 totals = dict(all=total_reports,
               recalled=total_drm_reports,
@@ -68,49 +65,40 @@ for key, lbl in labels.items():
 
 #########  draw the plot  #########
 
-fig, ax1 = plt.subplots(figsize=(5,5))
-ax2 = ax1.twinx() # for opposite yaxis
+fig, ax = plt.subplots(figsize=(5,5))
 
 # draw lines and points separately to have diff colored points
 for key, yvals in data.items():
-    ax1.plot(range(2,6),yvals,
-        color=axcolors[key],linestyle='-',linewidth=1,zorder=1)
-    ax1.scatter(range(2,6),yvals,
+    ax.plot(range(2,6),yvals,
+        color='k',linestyle='-',linewidth=1,zorder=1)
+    ax.scatter(range(2,6),yvals,
         color=[ myplt.dlqcolor(i) for i in range(2,6) ],
-        marker=markers[key],edgecolors=axcolors[key],
-        s=150,zorder=2,linewidths=1.5)
+        marker=markers[key],edgecolors='w',
+        s=150,zorder=2,linewidths=.5)
 
-# handle the xaxis first bc universal
-ax1.set_xticks(range(2,6))
+# handle the xaxis
+ax.set_xticks(range(2,6))
 xticklabels = [ myplt.DLQ_STRINGS[i] for i in range(2,6) ]
 xticklabels = [ x if x == 'Very much' else f'>= {x}'
                 for x in xticklabels ]
-ax1.set_xticklabels(xticklabels,rotation=25)
-ax1.set_xlabel('Lucid dream criterion')
+ax.set_xticklabels(xticklabels,rotation=25)
+ax.set_xlabel('Lucid dream criterion')
 
 # handle yaxes
 minor_yticks = pd.np.linspace(0,1,21)
 major_yticks = pd.np.linspace(0,1,11)
 # label yticks with percentages
 # major_yticklabels = [ '{:.0f}'.format(x*100) for x in major_yticks ]
-for ax in [ax1,ax2]:
-    ax.set_yticks(minor_yticks,minor=True)
-    ax.set_xlim(1.5,5.5)
-    ax.set_ylim(0,1)
-    ax.set_yticks(major_yticks)
-    # ax.set_yticklabels(major_yticklabels)
-    ax.spines['top'].set_visible(False)
-    ax.spines['left'].set_color(axcolors['all'])
-    ax.spines['right'].set_color(axcolors['subjs'])
+ax.set_yticks(minor_yticks,minor=True)
+ax.set_xlim(1.5,5.5)
+ax.set_ylim(0,1)
+ax.set_yticks(major_yticks)
+ax.set_ylabel('Lucid dream induction success')
+# ax.set_yticklabels(major_yticklabels)
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
 
-ax1.set_ylabel('Proportion of lucid dreams',color=axcolors['all'])
-ax2.set_ylabel('Proportion of lucid participants',
-               color=axcolors['subjs'],rotation=-90,va='bottom')
-for which in ['major','minor']:
-    ax1.tick_params(axis='y',which=which,color=axcolors['all'],labelcolor=axcolors['all'])
-    ax2.tick_params(axis='y',which=which,color=axcolors['subjs'],labelcolor=axcolors['subjs'])
-
-ax1.grid(True,axis='y',which='minor',
+ax.grid(True,axis='y',which='minor',
         linestyle='--',linewidth=.25,color='k',alpha=1)
 
 # legend for markers
@@ -118,9 +106,9 @@ legend_patches = [ matplotlib.lines.Line2D([],[],
                     label=label,marker=markers[key],
                     color='gray',linestyle='none')
                 for key, label in labels.items() ]
-ax1.legend(handles=legend_patches,loc='upper right',
-           title='Data included',
-           frameon=True,framealpha=1,edgecolor='k')
+ax.legend(handles=legend_patches,loc='upper right',
+          title='Evaluation',
+          frameon=True,framealpha=1,edgecolor='k')
 
 
 plt.tight_layout()
