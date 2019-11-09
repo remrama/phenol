@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt; plt.ion()
 import pyplotparams as myplt
 
 
-resdir = path.expanduser('~/IDrive-Sync/proj/phenol/results')
+resdir = path.expanduser('~/DBp/proj/phenoll/results')
 infname = path.join(resdir,'dlq1-frequency.tsv')
 
 
@@ -38,46 +38,79 @@ DLQ_COLS = [ f'DLQ1_resp-{i}' for i in range(2,6) ]
 ld_prprtion_of_all  = cumsum_df[DLQ_COLS].apply(lambda srs: srs.sum() / total_reports, axis=0)
 ld_prprtion_of_drms = cumsum_df[DLQ_COLS].apply(lambda srs: srs.sum() / total_drm_reports, axis=0)
 
-data = dict(all=ld_prprtion_of_all,recalled=ld_prprtion_of_drms)
-markers = dict(all='s',recalled='o')
-labels = dict(all='All attempts',recalled='Only recalled dreams')
+######### get proportion of success for each cutoff
+######### but now measured as proportion of subjs
+n_subjs = df.shape[0]
+# get a list of proportions of subjs that pass cutoff at each cutoff
+ld_prprtion_of_subjs = [ (cumsum_df[col] > 0).mean() for col in DLQ_COLS ]
+
+
+
+
+
+data = dict(all=ld_prprtion_of_all,
+            recalled=ld_prprtion_of_drms,
+            subjs=ld_prprtion_of_subjs)
+markers = dict(all='s',recalled='o',subjs='^')
+labels = dict(all='Proportion of all attempts',
+              recalled='Proportion of recalled dreams',
+              subjs='Proportion of subjects')
+axcolors = dict(all='darkgoldenrod',
+                recalled='darkgoldenrod',
+                subjs='forestgreen')
 # append total to the labels
-totals = dict(all=total_reports,recalled=total_drm_reports)
+totals = dict(all=total_reports,
+              recalled=total_drm_reports,
+              subjs=n_subjs)
 for key, lbl in labels.items():
-    labels[key] = f'{lbl} ({totals[key]:d})'
+    labels[key] = f'{lbl} ($\mathit{{n}}$={totals[key]:d})'
 
 
 #########  draw the plot  #########
 
-fig, ax = plt.subplots(figsize=(5,5))
+fig, ax1 = plt.subplots(figsize=(5,5))
+ax2 = ax1.twinx() # for opposite yaxis
 
 # draw lines and points separately to have diff colored points
 for key, yvals in data.items():
-    ax.plot(range(2,6),yvals,
-        color='k',linestyle='-',linewidth=1,zorder=1)
-    ax.scatter(range(2,6),yvals,
+    ax1.plot(range(2,6),yvals,
+        color=axcolors[key],linestyle='-',linewidth=1,zorder=1)
+    ax1.scatter(range(2,6),yvals,
         color=[ myplt.dlqcolor(i) for i in range(2,6) ],
-        marker=markers[key],s=150,zorder=2,edgecolors='w',linewidths=.5)
+        marker=markers[key],edgecolors=axcolors[key],
+        s=150,zorder=2,linewidths=1.5)
 
+# handle the xaxis first bc universal
+ax1.set_xticks(range(2,6))
+xticklabels = [ myplt.DLQ_STRINGS[i] for i in range(2,6) ]
+xticklabels = [ x if x == 'Very much' else f'>= {x}'
+                for x in xticklabels ]
+ax1.set_xticklabels(xticklabels,rotation=25)
+ax1.set_xlabel('Lucid dream criterion')
+
+# handle yaxes
 minor_yticks = pd.np.linspace(0,1,21)
 major_yticks = pd.np.linspace(0,1,11)
 # label yticks with percentages
 # major_yticklabels = [ '{:.0f}'.format(x*100) for x in major_yticks ]
-ax.set_yticks(minor_yticks,minor=True)
-ax.set_xlim(1.5,5.5)
-ax.set_ylim(0,1)
-ax.set_yticks(major_yticks)
-# ax.set_yticklabels(major_yticklabels)
-ax.set_xticks(range(2,6))
-xticklabels = [ myplt.DLQ_STRINGS[i] for i in range(2,6) ]
-xticklabels = [ x if x == 'Very much' else f'>= {x}'
-                for x in xticklabels ]
-ax.set_xticklabels(xticklabels,rotation=25)
-ax.set_ylabel('Proportion of lucid dreams')
-ax.set_xlabel('Lucid dream criterion')
-ax.spines['top'].set_visible(False)
-ax.spines['right'].set_visible(False)
-ax.grid(True,axis='y',which='minor',
+for ax in [ax1,ax2]:
+    ax.set_yticks(minor_yticks,minor=True)
+    ax.set_xlim(1.5,5.5)
+    ax.set_ylim(0,1)
+    ax.set_yticks(major_yticks)
+    # ax.set_yticklabels(major_yticklabels)
+    ax.spines['top'].set_visible(False)
+    ax.spines['left'].set_color(axcolors['all'])
+    ax.spines['right'].set_color(axcolors['subjs'])
+
+ax1.set_ylabel('Proportion of lucid dreams',color=axcolors['all'])
+ax2.set_ylabel('Proportion of lucid participants',
+               color=axcolors['subjs'],rotation=-90,va='bottom')
+for which in ['major','minor']:
+    ax1.tick_params(axis='y',which=which,color=axcolors['all'],labelcolor=axcolors['all'])
+    ax2.tick_params(axis='y',which=which,color=axcolors['subjs'],labelcolor=axcolors['subjs'])
+
+ax1.grid(True,axis='y',which='minor',
         linestyle='--',linewidth=.25,color='k',alpha=1)
 
 # legend for markers
@@ -85,9 +118,9 @@ legend_patches = [ matplotlib.lines.Line2D([],[],
                     label=label,marker=markers[key],
                     color='gray',linestyle='none')
                 for key, label in labels.items() ]
-ax.legend(handles=legend_patches,loc='upper right',
-          title='Data included',
-          frameon=True,framealpha=1,edgecolor='k')
+ax1.legend(handles=legend_patches,loc='upper right',
+           title='Data included',
+           frameon=True,framealpha=1,edgecolor='k')
 
 
 plt.tight_layout()
