@@ -5,13 +5,14 @@ per lucidity level across all participants.
 
 from os import path
 import pandas as pd
+from scipy import stats
 
 import matplotlib; matplotlib.use('Qt5Agg') # python3 bug
 import matplotlib.pyplot as plt; plt.ion()
 
 import pyplotparams as myplt
 
-resdir = path.expanduser('~/IDrive-Sync/proj/phenol/results')
+resdir = path.expanduser('~/DBp/proj/phenoll/results')
 infname = path.join(resdir,'dlq1-frequency.tsv')
 
 
@@ -75,3 +76,30 @@ for ext in ['png','svg','eps']:
     plt.savefig(infname.replace('tsv',ext))
 plt.close()
 
+
+
+##########  stats on the frequencies  ###########
+
+# Use chi2 to test the difference among a group
+# of proportions, and then pairwise with binomial test.
+
+# is there a difference among the whole DLQ score?
+chisq, p = stats.chisquare(yvals)
+print('Chi squared stat comparing the frequencies of each DLQ-1 response option',
+     f'chisq={chisq:.2f}',f'p={p:.4f}')
+
+# is there a difference among the lucidity options (non-zero)?
+nonzero_opts = yvals[1:]
+chisq, p = stats.chisquare(nonzero_opts)
+print('Chi squared stat comparing the frequencies of non-zero DLQ-1 response options',
+     f'chisq={chisq:.2f}',f'p={p:.4f}')
+
+# compare if half the nights had LDs or not**
+# but note that we don't really care about this,
+# since we also highlight how it depends on how
+# you measure success. But run this just to be able
+# to say there were about half LDs
+obs = [ yvals[0], sum(nonzero_opts) ]
+p = stats.binom_test(obs,n=None,p=0.5,alternative='two-sided')
+print('Binomial test comparing if half of dreams had some level of lucidity',
+     f'p={p:.4f}')
