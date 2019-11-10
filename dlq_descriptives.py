@@ -6,6 +6,8 @@ For each DLQ probe, plot a box including
 data from all attempts that include recall,
 and also a box including only responses
 that include non-zero awareness.
+
+Also save out descriptives dataframe.
 """
 from os import path
 import pandas as pd
@@ -23,7 +25,6 @@ datadir = path.expanduser('~/DBp/proj/phenoll/data')
 resdir = path.expanduser('~/DBp/proj/phenoll/results')
 
 infname = path.join(datadir,'data-clean.tsv')
-outfname = path.join(resdir,'dlq_summary.png')
 
 df = pd.read_csv(infname,sep='\t')
 
@@ -64,7 +65,50 @@ for i, (ax,data) in enumerate(zip(axes,[plot_data_all,plot_data_lim])):
 
 plt.tight_layout()
 
-plt.savefig(outfname)
-plt.savefig(outfname.replace('png','svg'))
-plt.savefig(outfname.replace('png','eps'))
+
+for ext in ['png','svg','eps']:
+    plot_fname = path.join(resdir,f'dlq_descriptives-plot.{ext}')
+    plt.savefig(plot_fname)
 plt.close()
+
+
+
+#### descriptives dataframe
+
+DLQ_COLS = [ f'DLQ:{i}' for i in range(1,20) ]
+
+# first get quartiles for each DLQ question
+quartile_df = df[DLQ_COLS].quantile(q=[.25,.5,.75]).T
+quartile_df.columns = [ f'quantile_{x}' for x in quartile_df.columns ]
+
+### median and CI??
+
+# now get contingency stuff
+# go from wide to long format
+df = df.melt(value_vars=DLQ_COLS,
+             id_vars=['subj'],
+             var_name='probe',value_name='likert')
+
+# convert to categorical so 0s will show up in crosstab
+df['likert'] = pd.Categorical(df['likert'],categories=range(1,6),ordered=True)
+
+# make the contingency table
+cont_df = pd.crosstab(df['probe'],df['likert'],dropna=False)
+
+# drop extra layer for column index
+cont_df.columns = [ f'likert-{x}' for x in cont_df.columns ]
+
+
+## combine both dataframes
+descr_df = pd.concat([cont_df,quartile_df],axis='columns',
+    ignore_index=False,sort=True)
+
+# pad index values so they get ordered correctly
+def zero_padding(x):
+    return 'DLQ:{:02d}'.format(int(x.split(':')[1]))
+descr_df.index = descr_df.index.map(zero_padding)
+descr_df.sort_index(inplace=True)
+
+# export descriptives dataframe
+df_fname = path.join(resdir,'dlq_descriptives-data.tsv')
+descr_df.to_csv(df_fname,index=True,index_label='probe',sep='\t')
