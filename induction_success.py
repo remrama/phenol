@@ -4,6 +4,12 @@ all subjects and sessions, at different
 DLQ1 cutoffs/criteria.
 
 Also save data and stats dataframes.
+
+The idea here is not to really get a single
+measure of induction success, but to change
+the criterion and measure of lucidity to see
+how induction success varies as a function
+of those two things.
 """
 from os import path
 import pandas as pd
