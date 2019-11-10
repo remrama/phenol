@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt; plt.ion()
 
 import pyplotparams as myplt
 
-resdir = path.expanduser('~/IDrive-Sync/proj/phenol/results')
+resdir = path.expanduser('~/DBp/proj/phenoll/results')
 infname = path.join(resdir,'dlq1-frequency.tsv')
 
 
@@ -56,8 +56,9 @@ ax.legend(handles=legend_patches,loc='upper right',
           frameon=True,bbox_to_anchor=(1.15,1.15))
 
 plt.tight_layout()
-for ext in ['.png','.svg','.eps']:
-    plt.savefig(infname.replace('.tsv',f'-indiv{ext}'))
+for ext in ['png','svg','eps']:
+    plot_fname = path.join(resdir,f'induction_success_indiv-plot.{ext}')
+    plt.savefig(plot_fname)
 plt.close()
 
 
