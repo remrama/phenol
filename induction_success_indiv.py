@@ -24,6 +24,8 @@ df = pd.read_csv(infname,index_col='subj',sep='\t')
 cumsum_cols = pd.np.roll(df.columns.sort_values(ascending=False),-1).tolist()
 cumsum_df = df[cumsum_cols].cumsum(axis=1)
 
+df_fname = path.join(resdir,'induction_success_indiv-data.tsv')
+cumsum_df.to_csv(df_fname,index=True,sep='\t')
 
 
 #########  draw the plot  #########
