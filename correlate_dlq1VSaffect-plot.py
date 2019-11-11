@@ -41,7 +41,7 @@ neg_panas_cols = [ f'Affect:{x}' for x in NEG_PANAS ]
 datadf['pos_affect'] = datadf[pos_panas_cols].mean(axis=1)
 datadf['neg_affect'] = datadf[neg_panas_cols].mean(axis=1)
 control_cols = [ f'DLQ:{x}' for x in [4,6,8,10] ]
-df['dream_control'] = df[control_cols].mean(axis=1)
+datadf['dream_control'] = datadf[control_cols].mean(axis=1)
 
 
 
@@ -86,10 +86,10 @@ for ax, var in zip(axes.flat,probe_order):
     else:
         ax.set_ylabel('')
         ax.set_yticklabels([])
-    if var == 'neg_affect':
-        ax.set_xlabel('Negative morning affect')
-    elif var == 'pos_affect':
-        ax.set_xlabel('Positive morning affect')
+    xlabel_dict = dict(neg_affect='Negative morning affect',
+                       pos_affect='Positive morning affect',
+                       dream_control='Dream control')
+    ax.set_xlabel(xlabel_dict[var])
 
     ax.grid(True,axis='y',which='major',linestyle='--',linewidth=.25,color='k',alpha=1)
 
@@ -129,16 +129,15 @@ for x, probe in enumerate(probe_order):
 
 ax.axhline(0,linestyle='--',linewidth=.25,color='k')
 
-ax.set_xticks([0,1])
+ax.set_xticks(range(n_axcols))
 ax.set_xlim(-.5,n_axcols-1+.5)
-xticklabel_dict = dict(neg_affect='Negative',
-                       pos_affect='Positive',
-                       dream_control='Drea\ncontrol')
+xticklabel_dict = dict(neg_affect='Negative\nmorning\naffect',
+                       pos_affect='Positive\nmorning\naffect',
+                       dream_control='Dream\ncontrol')
 xticklabels = [ xticklabel_dict[probe] for probe in probe_order ]
 ax.set_xticklabels(xticklabels)
-ax.set_xlabel('Morning affect')
 ax.set_ylabel('Correlation with DLQ1\n(Fisher z-transformed $\it{r}$ value)')
-ax.set_ylim(-1.2,1.2)
+ax.set_ylim(-2.2,2.2)
 ax.yaxis.set_major_locator(MultipleLocator(1))
 ax.yaxis.set_minor_locator(MultipleLocator(.25))
 ax.spines['top'].set_visible(False)

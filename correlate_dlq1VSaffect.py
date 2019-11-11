@@ -98,7 +98,13 @@ for col in tqdm.tqdm(AFFECT_COLS,desc='resampling correlations'):
     # res_df.loc[col,['intercept','slope']] = intercept, slope
 
 # fisher zscore all r values
-res_df['rfishz'] = res_df['r'].map(pd.np.arctanh)
+# arctanh can't handle -1 or 1
+def fisherz(x):
+    if x in [-1,1]:
+        # multiply by x to 
+        x -= pd.np.sign(x) * .000001 # picked 6 decimal points bc that's the precision of other values
+    return pd.np.arctanh(x)
+res_df['rfishz'] = res_df['r'].map(fisherz)
 
 CI_LO = .025
 CI_HI = .975
