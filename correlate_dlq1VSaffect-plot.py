@@ -102,7 +102,7 @@ plt.close()
 
 ########### plot the fisher zscores ###########
 
-fig, ax = plt.subplots(figsize=(2.5,5))
+fig, ax = plt.subplots(figsize=(3,5))
 violin_data = [ rsmpdf.loc['neg_affect','rfishz'].values,
                 rsmpdf.loc['pos_affect','rfishz'].values ]
 viols = ax.violinplot(violin_data,positions=[0,1],
@@ -126,7 +126,7 @@ ax.set_xticks([0,1])
 ax.set_xlim(-.5,1.5)
 ax.set_xticklabels(['Negative','Positive'])
 ax.set_xlabel('Morning affect')
-ax.set_ylabel('Fisher z-transformed correlation with DLQ1')
+ax.set_ylabel('Correlation with DLQ1\n(Fisher z-transformed $\it{r}$ value)')
 ax.set_ylim(-1.25,1.25)
 ax.yaxis.set_major_locator(MultipleLocator(1))
 ax.yaxis.set_minor_locator(MultipleLocator(.25))
