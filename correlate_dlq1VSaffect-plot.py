@@ -49,6 +49,8 @@ datadf['neg_affect'] = datadf[neg_panas_cols].mean(axis=1)
 #         palette=palette,col_order=DREAM_CHR_COLS,
 #         kind='swarm',orient='h')
 
+# reverse the order so positive is first
+probe_order = statdf.index[::-1]
 
 palette = { x: myplt.dlqcolor(x) for x in myplt.DLQ_STRINGS.keys() }
 
@@ -59,7 +61,7 @@ width = 5 * n_axcols
 fig, axes = plt.subplots(n_axrows,n_axcols,figsize=(width,height),
                          squeeze=False,sharex=False,sharey=False)
 
-for ax, var in zip(axes.flat,statdf.index):
+for ax, var in zip(axes.flat,probe_order):
 
     # scatterplot
     sea.swarmplot(y='DLQ:1',x=var,data=datadf,
@@ -103,17 +105,17 @@ plt.close()
 ########### plot the fisher zscores ###########
 
 fig, ax = plt.subplots(figsize=(3,5))
-violin_data = [ rsmpdf.loc['neg_affect','rfishz'].values,
-                rsmpdf.loc['pos_affect','rfishz'].values ]
-viols = ax.violinplot(violin_data,positions=[0,1],
-                      widths=[.5,.5],
+violin_data = [ rsmpdf.loc[probe,'rfishz'].values for probe in probe_order ]
+n_violins = len(violin_data)
+viols = ax.violinplot(violin_data,positions=range(n_violins),
+                      widths=pd.np.repeat(.5,n_violins),
                       showextrema=False)
 plt.setp(viols['bodies'],
         facecolor='gray',
         edgecolor='white')
 
 # add error bars of 95% CI
-for x, probe in enumerate(statdf.index.values):
+for x, probe in enumerate(probe_order):
     ci = statdf.loc[probe,['rfishz_cilo','rfishz_cihi']].values
     y = statdf.loc[probe,'rfishz_mean']
     yerr = abs( ci.reshape(2,1) - y )
@@ -124,10 +126,12 @@ ax.axhline(0,linestyle='--',linewidth=.25,color='k')
 
 ax.set_xticks([0,1])
 ax.set_xlim(-.5,1.5)
-ax.set_xticklabels(['Negative','Positive'])
+xticklabel_dict = dict(neg_affect='Negative',pos_affect='Positive')
+xticklabels = [ xticklabel_dict[probe] for probe in probe_order ]
+ax.set_xticklabels(xticklabels)
 ax.set_xlabel('Morning affect')
 ax.set_ylabel('Correlation with DLQ1\n(Fisher z-transformed $\it{r}$ value)')
-ax.set_ylim(-1.25,1.25)
+ax.set_ylim(-1.2,1.2)
 ax.yaxis.set_major_locator(MultipleLocator(1))
 ax.yaxis.set_minor_locator(MultipleLocator(.25))
 ax.spines['top'].set_visible(False)
