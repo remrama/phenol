@@ -1,6 +1,8 @@
 """
 Plot relationship between DLQ1 and reported dream characteristics.
 
+Also adding the control stuff at the moment.
+
 Outputs 2 plots
     - swarmplots with regression line
     - distribution of fisherz r values
@@ -38,6 +40,8 @@ NEG_PANAS = [2,4,6,7,8,11,13,15,18,20]
 neg_panas_cols = [ f'Affect:{x}' for x in NEG_PANAS ]
 datadf['pos_affect'] = datadf[pos_panas_cols].mean(axis=1)
 datadf['neg_affect'] = datadf[neg_panas_cols].mean(axis=1)
+control_cols = [ f'DLQ:{x}' for x in [4,6,8,10] ]
+df['dream_control'] = df[control_cols].mean(axis=1)
 
 
 
@@ -104,7 +108,8 @@ plt.close()
 
 ########### plot the fisher zscores ###########
 
-fig, ax = plt.subplots(figsize=(3,5))
+width = 1.25 * n_axcols
+fig, ax = plt.subplots(figsize=(width,5))
 violin_data = [ rsmpdf.loc[probe,'rfishz'].values for probe in probe_order ]
 n_violins = len(violin_data)
 viols = ax.violinplot(violin_data,positions=range(n_violins),
@@ -125,8 +130,10 @@ for x, probe in enumerate(probe_order):
 ax.axhline(0,linestyle='--',linewidth=.25,color='k')
 
 ax.set_xticks([0,1])
-ax.set_xlim(-.5,1.5)
-xticklabel_dict = dict(neg_affect='Negative',pos_affect='Positive')
+ax.set_xlim(-.5,n_axcols-1+.5)
+xticklabel_dict = dict(neg_affect='Negative',
+                       pos_affect='Positive',
+                       dream_control='Drea\ncontrol')
 xticklabels = [ xticklabel_dict[probe] for probe in probe_order ]
 ax.set_xticklabels(xticklabels)
 ax.set_xlabel('Morning affect')

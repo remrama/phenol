@@ -16,6 +16,8 @@ are the proportion of fisher zscored R values that are above/below 0.
 
 Export 2 dataframes, one that holds all the resampled correlations
 and another that holds the final stats and correlation parameters.
+
+***** adding control stuff atm
 """
 from os import path
 import tqdm
@@ -47,6 +49,8 @@ POS_PANAS = [1,3,5,9,10,12,14,16,17,19]
 pos_panas_cols = [ f'Affect:{x}' for x in POS_PANAS ]
 NEG_PANAS = [2,4,6,7,8,11,13,15,18,20]
 neg_panas_cols = [ f'Affect:{x}' for x in NEG_PANAS ]
+control_cols = [ f'DLQ:{x}' for x in [4,6,8,10] ]
+
 
 N_RESAMPLES = 10000 # per dream characteristic
 
@@ -62,10 +66,11 @@ df = df[df['dreamreport:1']!='No recall']
 # get a summary stat for pos/neg affect
 df['pos_affect'] = df[pos_panas_cols].mean(axis=1)
 df['neg_affect'] = df[neg_panas_cols].mean(axis=1)
+df['dream_control'] = df[control_cols].mean(axis=1)
 
 
 # pick the columns of interest
-AFFECT_COLS = ['pos_affect','neg_affect']
+AFFECT_COLS = ['pos_affect','neg_affect','dream_control']
 METRICS = ['slope','intercept','r']
 index = pd.MultiIndex.from_product([AFFECT_COLS,range(N_RESAMPLES)],
                                     names=['probe','resample'])
