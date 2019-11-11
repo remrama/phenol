@@ -11,6 +11,8 @@ import pandas as pd
 
 import matplotlib; matplotlib.use('Qt5Agg') # python3 bug
 import matplotlib.pyplot as plt; plt.ion()
+from matplotlib.ticker import MultipleLocator
+
 import seaborn as sea
 
 import pyplotparams as myplt
@@ -91,8 +93,49 @@ for ax, var in zip(axes.flat,statdf.index):
     ax.plot(x,line,color='k',linewidth=1)
 
 plt.tight_layout()
-
 for ext in ['png','svg','eps']:
     plot_fname = path.join(resdir,f'correlate_affect-plot.{ext}')
+    plt.savefig(plot_fname)
+plt.close()
+
+
+
+########### plot the fisher zscores ###########
+
+fig, ax = plt.subplots(figsize=(2.5,5))
+violin_data = [ rsmpdf.loc['neg_affect','rfishz'].values,
+                rsmpdf.loc['pos_affect','rfishz'].values ]
+viols = ax.violinplot(violin_data,positions=[0,1],
+                      widths=[.5,.5],
+                      showextrema=False)
+plt.setp(viols['bodies'],
+        facecolor='gray',
+        edgecolor='white')
+
+# add error bars of 95% CI
+for x, probe in enumerate(statdf.index.values):
+    ci = statdf.loc[probe,['rfishz_cilo','rfishz_cihi']].values
+    y = statdf.loc[probe,'rfishz_mean']
+    yerr = abs( ci.reshape(2,1) - y )
+    ax.errorbar(x,y,yerr,marker='o',color='k',markersize=1,
+                capsize=1,capthick=0,linewidth=.5)
+
+ax.axhline(0,linestyle='--',linewidth=.25,color='k')
+
+ax.set_xticks([0,1])
+ax.set_xlim(-.5,1.5)
+ax.set_xticklabels(['Negative','Positive'])
+ax.set_xlabel('Morning affect')
+ax.set_ylabel('Fisher z-transformed correlation with DLQ1')
+ax.set_ylim(-1.25,1.25)
+ax.yaxis.set_major_locator(MultipleLocator(1))
+ax.yaxis.set_minor_locator(MultipleLocator(.25))
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+
+plt.tight_layout()
+
+for ext in ['png','svg','eps']:
+    plot_fname = path.join(resdir,f'correlate_affect-plot_rs.{ext}')
     plt.savefig(plot_fname)
 plt.close()
