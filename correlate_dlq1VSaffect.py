@@ -48,7 +48,7 @@ pos_panas_cols = [ f'Affect:{x}' for x in POS_PANAS ]
 NEG_PANAS = [2,4,6,7,8,11,13,15,18,20]
 neg_panas_cols = [ f'Affect:{x}' for x in NEG_PANAS ]
 
-N_RESAMPLES = 1000 # per dream characteristic
+N_RESAMPLES = 10000 # per dream characteristic
 
 datadir = path.expanduser('~/DBp/proj/phenoll/data')
 resdir  = path.expanduser('~/DBp/proj/phenoll/results')
