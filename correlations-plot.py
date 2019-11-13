@@ -27,8 +27,8 @@ with open('./config.json') as f:
     control_probes = p['DLQ_control_probes']
 
 data_fname = path.join(datadir,'data-clean.tsv')
-resample_fname = path.join(resdir,'correlation-data.tsv')
-stats_fname = path.join(resdir,'correlation-stats.tsv')
+resample_fname = path.join(resdir,'correlations-data.tsv')
+stats_fname = path.join(resdir,'correlations-stats.tsv')
 
 datadf = pd.read_csv(data_fname,sep='\t')
 rsmpdf = pd.read_csv(resample_fname,sep='\t',index_col='probe')
@@ -130,7 +130,7 @@ if n_axes % 2 != 0:
 
 plt.tight_layout()
 for ext in ['png','svg','eps']:
-    plot_fname = path.join(resdir,f'correlate_dlq1-plot.{ext}')
+    plot_fname = path.join(resdir,f'correlations-plot.{ext}')
     plt.savefig(plot_fname)
 plt.close()
 
@@ -181,6 +181,6 @@ ax.set_xlim(-.5,n_violins-.5)
 
 plt.tight_layout()
 for ext in ['png','svg','eps']:
-    plot_fname = path.join(resdir,f'correlation-plot_rs.{ext}')
+    plot_fname = path.join(resdir,f'correlations-plot_rs.{ext}')
     plt.savefig(plot_fname)
 plt.close()

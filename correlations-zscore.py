@@ -27,7 +27,7 @@ CI_HI = .975
 
 #######  load and manipulate data  #######
 
-infname = path.join(RES_DIR,'correlate_dlq1-data.tsv')
+infname = path.join(RES_DIR,'correlations-data.tsv')
 res_df = pd.read_csv(infname,sep='\t',index_col=['probe','resample'])
 
 
@@ -69,7 +69,7 @@ for df in [stats_df,res_df]:
         fmt = '%.04f' if 'pval' in col else '%.02f'
         df[col] = df[col].map(lambda x: fmt % x)
 
-stats_fname = path.join(RES_DIR,'correlation-stats.tsv')
+stats_fname = path.join(RES_DIR,'correlations-stats.tsv')
 stats_df.to_csv(stats_fname,index=True,sep='\t')
 
 res_df.to_csv(infname,index=True,sep='\t')
