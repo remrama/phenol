@@ -87,7 +87,7 @@ for col in tqdm.tqdm(COLS2CORR,desc='resampling correlations'):
 
 # round values while also changing output format to print full values
 for col in res_df.columns:
-    res_df[col] = res_df[col].map(lambda x: '%.02f' % x)
+    res_df[col] = res_df[col].map(lambda x: '%.04f' % x)
 res_fname = path.join(RES_DIR,'correlations-data.tsv')
 res_df.to_csv(res_fname,index=True,sep='\t')
 
