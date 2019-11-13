@@ -17,7 +17,7 @@ import seaborn as sea
 import pyplotparams as myplt
 
 
-# load analysis parameters from configuration file
+# load parameters from configuration file
 with open('./config.json') as f:
     p = load(f)
     datadir = path.expanduser(p['data_directory'])
@@ -44,14 +44,8 @@ datadf['panas_neg']     = datadf[panas_neg_cols].mean(axis=1)
 datadf['dream_control'] = datadf[control_cols].mean(axis=1)
 
 
-# # to do with catplot instead (all axes at once)
-# melted_df = datadf.melt(value_vars=DREAM_CHR_COLS,
-#                         id_vars=['subj','DLQ:1'],var_name='dream_chr')
-# sea.catplot(y='DLQ:1',x='value',col='dream_chr',data=melted_df,col_wrap=4,
-#         height=4,aspect=.75,linewidth=1,#jitter=.2,
-#         palette=palette,col_order=DREAM_CHR_COLS,
-#         kind='swarm',orient='h')
 
+#######  raw data plots with regression lines  #######
 
 palette = { x: myplt.dlqcolor(x) for x in myplt.DLQ_STRINGS.keys() }
 
@@ -72,6 +66,9 @@ xlabel_dict = {
 low_xmax_vars = ['panas_pos','panas_neg','dream_control']
 xlims_dict = { var: 5 if var in low_xmax_vars else 10
     for var in xlabel_dict.keys() }
+
+# set it up so everything will be ordered by correlation effect
+statdf.sort_values('rfishz_mean',ascending=False,inplace=True)
 
 # extract all the columns/variables that we correlated
 correlated_vars = statdf.index
@@ -183,7 +180,6 @@ ax.set_xticklabels(xticklabels,rotation=33,ha='right')
 ax.set_xlim(-.5,n_violins-.5)
 
 plt.tight_layout()
-
 for ext in ['png','svg','eps']:
     plot_fname = path.join(resdir,f'correlate_dlq1-plot_rs.{ext}')
     plt.savefig(plot_fname)
