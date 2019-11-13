@@ -5,13 +5,20 @@ response value/option of DLQ for question 1.
 Exports tsv table.
 """
 from os import path
+from json import load
 import pandas as pd
 
 datadir = path.expanduser('~/IDrive-Sync/proj/phenol/data')
 resdir = path.expanduser('~/IDrive-Sync/proj/phenol/results')
 
-infname = path.join(datadir,'data-clean.tsv')
-outfname = path.join(resdir,'dlq1-frequency.tsv')
+# load directory info from configuration file
+with open('./config.json') as f:
+    p = load(f)
+    DATADIR = path.expanduser(p['data_directory'])
+    RESDIR  = path.expanduser(p['results_directory'])
+
+infname = path.join(DATADIR,'data-clean.tsv')
+outfname = path.join(RESDIR,'dlq1-frequency.tsv')
 
 indf = pd.read_csv(infname,sep='\t')
 
