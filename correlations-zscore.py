@@ -66,10 +66,10 @@ stats_df['pval_corrected'] = corrp
 # round values while also changing output format to print full values
 for df in [stats_df,res_df]:
     for col in df.columns:
-        fmt = '%.04f' if col == 'pval' else '%.02f'
+        fmt = '%.04f' if 'pval' in col else '%.02f'
         df[col] = df[col].map(lambda x: fmt % x)
 
-stats_fname = path.join(RES_DIR,'correlate_dlq1-stats.tsv')
+stats_fname = path.join(RES_DIR,'correlation-stats.tsv')
 stats_df.to_csv(stats_fname,index=True,sep='\t')
 
 res_df.to_csv(infname,index=True,sep='\t')
