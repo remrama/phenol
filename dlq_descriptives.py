@@ -26,6 +26,7 @@ with open('./config.json') as f:
     p = load(f)
     DATADIR = path.expanduser(p['data_directory'])
     RESDIR  = path.expanduser(p['results_directory'])
+    DLQ_STRINGS = p['DLQ_probes']
 # choose which DLQ probes get plotted
 DLQ_COLS = [ f'DLQ:{i}' for i in range(1,20) ]
 
@@ -42,38 +43,43 @@ plot_data_all = df[DLQ_COLS].values
 plot_data_lim = df.loc[df['DLQ:1']>1,DLQ_COLS].values
 
 # open figure
-fig, axes = plt.subplots(2,1,figsize=(1*len(DLQ_COLS),12))
+width = 14
+height = 1*len(DLQ_COLS)
+fig, axes = plt.subplots(1,2,figsize=(width,height))
 
 # loop over two datasets
 for i, (ax,data) in enumerate(zip(axes,[plot_data_all,plot_data_lim])):
    
     # boxplot
-    ax.boxplot(data,widths=.4,#positions=pd.np.arange(.5,10.5),
-               patch_artist=True,showbox=True,showfliers=True,
+    ax.boxplot(data,widths=.4,vert=False,patch_artist=True,
+               showbox=True,showfliers=True,showmeans=True,meanline=True,
                boxprops={'facecolor':'gainsboro'},
-               medianprops={'color':'red','linewidth':1.7})
+               medianprops={'color':'red','linewidth':2},
+               meanprops={'color':'blue','linewidth':2})
 
     # aesthetics
-    ax.set_yticks([1,2,3,4,5])
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.grid(True,axis='y',which='major',linestyle='--',
+    ax.set_xticks([1,2,3,4,5])
+    ax.grid(True,axis='x',which='major',linestyle='--',
             linewidth=.25,color='k',alpha=1)
     if i==0:
         ax.set_title('Across all dream reports')
-        ax.set_yticklabels(list(myplt.DLQ_STRINGS.values()),rotation=25)
-        ax.set_xticklabels([])
+        # ax.set_yticklabels(DLQ_COLS,rotation=25)
+        yticklabels = [ f'{x} ({i+1:02d})' for i, x in enumerate(DLQ_STRINGS) ]
+        ax.set_yticklabels(yticklabels,rotation=0)
+        ax.set_xticklabels(list(myplt.DLQ_STRINGS.values()),rotation=25,ha='right')
     elif i==1:
         ax.set_title('Across all dream reports with nonzero lucidity')
-        ax.set_xlabel('survey:probe')
-        ax.set_xticklabels(DLQ_COLS,rotation=25)
         ax.set_yticklabels([])
+        ax.set_xticklabels([])
+    ax.invert_yaxis() # flip so DLQ1 is on top
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
 
 plt.tight_layout()
 
 
 for ext in ['png','svg','eps']:
-    plot_fname = path.join(resdir,f'dlq_descriptives-plot.{ext}')
+    plot_fname = path.join(RESDIR,f'dlq_descriptives-plot.{ext}')
     plt.savefig(plot_fname)
 plt.close()
 

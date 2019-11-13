@@ -13,5 +13,27 @@
                                 "Bizarreness","Pos Emo",
                                 "Pos Body","Pos Mood",
                                 "panas_pos","panas_neg",
-                                "dream_control"]
+                                "dream_control"],
+
+    "DLQ_probes" : [
+        "I was aware that I was dreaming.",
+        "I was aware that my physical body was asleep.",
+        "I was aware that my dream characters weren't real.",
+        "I chose one action instead of another.",
+        "I was aware that dream objects were not real.",
+        "I changed dream events the way I wanted.",
+        "I recalled facts from waking life.",
+        "I changed dream characters the way I wanted.",
+        "I broke physical laws of waking reality.",
+        "I changed the dream scene the way I wanted.",
+        "I thought about possibilities of what I could do.",
+        "I remembered intentions of what I wanted to do.",
+        "I was sure dream events would not affect reality.",
+        "I was aware of differences to the waking state.",
+        "I kept my awareness for a satisfying period of time.",
+        "I deliberately decided to observe the dream.",
+        "I was able to deliberately shape my environment.",
+        "I had full control of my dream body.",
+        "I was able to perform specific actions."
+    ]
 }
