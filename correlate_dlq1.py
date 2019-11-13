@@ -52,8 +52,7 @@ df = pd.read_csv(infname,sep='\t')
 # drop all nights without recall
 df = df[df['dreamreport:1']!='No recall']
 
-# generate columns that require manipulations
-# of the raw data
+# generate columns that require manipulations of the raw data
 panas_pos_cols = [ f'Affect:{x}' for x in pos_probes ]
 panas_neg_cols = [ f'Affect:{x}' for x in neg_probes ]
 control_cols   = [ f'DLQ:{x}' for x in control_probes ]
