@@ -55,7 +55,7 @@ xlabel_dict = {
     'Neg Emo'       : 'Negative emotion',
     'Neg Body'      : 'Negative body',
     'Neg Mood'      : 'Negative mood',
-    ' Pos Emo'      : 'Positive emotion',
+    'Pos Emo'       : 'Positive emotion',
     'Pos Body'      : 'Positive body',
     'Pos Mood'      : 'Positive mood',
     'panas_pos'     : 'Positive morning affect',

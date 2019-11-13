@@ -14,12 +14,16 @@ that I think can safely be interpreted as zeros.
 
 Export as .tsv file because of commas in the text entries.
 """
-
-import os
+from os import path
+from json import load
 import pandas as pd
 
 
-infname = os.path.expanduser('~/IDrive-Sync/proj/phenol/data/data-raw.xls')
+with open('./config.json') as f:
+    p = load(f)
+    DATA_DIR = path.expanduser(p['data_directory'])
+
+infname = path.join(DATA_DIR,'data-raw.xls')
 outfname = infname.replace('-raw.xls','-clean.tsv')
 
 df = pd.read_excel(infname)

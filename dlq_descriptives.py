@@ -10,6 +10,7 @@ that include non-zero awareness.
 Also save out descriptives dataframe.
 """
 from os import path
+from json import load
 import pandas as pd
 
 import matplotlib; matplotlib.use('Qt5Agg')
@@ -18,14 +19,17 @@ import matplotlib.pyplot as plt; plt.ion()
 import pyplotparams as myplt
 
 
+# load directory info from configuration file
+with open('./config.json') as f:
+    p = load(f)
+    DATADIR = path.expanduser(p['data_directory'])
+    RESDIR  = path.expanduser(p['results_directory'])
 # choose which DLQ probes get plotted
 DLQ_COLS = [ f'DLQ:{i}' for i in range(1,20) ]
 
-datadir = path.expanduser('~/DBp/proj/phenoll/data')
-resdir = path.expanduser('~/DBp/proj/phenoll/results')
 
-infname = path.join(datadir,'data-clean.tsv')
-
+# load data
+infname = path.join(DATADIR,'data-clean.tsv')
 df = pd.read_csv(infname,sep='\t')
 
 # get rid of dreams without recall
@@ -110,5 +114,5 @@ descr_df.index = descr_df.index.map(zero_padding)
 descr_df.sort_index(inplace=True)
 
 # export descriptives dataframe
-df_fname = path.join(resdir,'dlq_descriptives-data.tsv')
+df_fname = path.join(RESDIR,'dlq_descriptives-data.tsv')
 descr_df.to_csv(df_fname,index=True,index_label='probe',sep='\t')

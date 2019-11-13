@@ -10,7 +10,7 @@
 
     "variables_to_correlate" : ["Sensory","Neg Emo",
                                 "Neg Body","Neg Mood",
-                                "Bizarreness"," Pos Emo",
+                                "Bizarreness","Pos Emo",
                                 "Pos Body","Pos Mood",
                                 "panas_pos","panas_neg",
                                 "dream_control"]
