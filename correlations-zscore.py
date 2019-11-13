@@ -13,7 +13,7 @@ from os import path
 from json import load
 import pandas as pd
 
-from statsmodels.stats.multitest import multipletests
+from statsmodels.stats.multitest import fdrcorrection
 
 
 # load results directory from configuration file
@@ -55,9 +55,7 @@ stats_df['pval'] = res_df.groupby('probe').agg({'rfishz':lambda col: pd.np.mean(
 
 # generate a pvalue accounting for multiple comparisons
 uncorrected_pvals = stats_df['pval'].values
-mc_results = multipletests(uncorrected_pvals,
-    alpha=0.05,method='fdr_bh',is_sorted=False,returnsorted=False)
-sig, corrp, alphacSidak, alphacBonf = mc_results
+_, corrp = fdrcorrection(uncorrected_pvals,method='indep',is_sorted=False)
 stats_df['pval_corrected'] = corrp
 
 

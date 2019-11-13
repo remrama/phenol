@@ -145,6 +145,13 @@ fig, axes = plt.subplots(2,1,figsize=(width,10),
 
 for ax, metric in zip(axes,['r','rfishz']):
 
+    if metric == 'r':
+        ylabel = 'Correlation with DLQ1 ($\it{r}$)'
+        ymin, ymax = -1, 1
+    elif metric == 'rfishz':
+        ylabel = 'Correlation with DLQ1\n(Fisher z-transformed $\it{r}$ value)'
+        ymin, ymax = -2.2, 2.2
+
     violin_data = [ rsmpdf.loc[var,metric].values for var in correlated_vars ]
     viols = ax.violinplot(violin_data,positions=range(n_violins),
                           widths=pd.np.repeat(.5,n_violins),
@@ -158,21 +165,24 @@ for ax, metric in zip(axes,['r','rfishz']):
         yerr = abs( ci.reshape(2,1) - y )
         ax.errorbar(x,y,yerr,marker='o',color='k',markersize=1,
                     capsize=1,capthick=0,linewidth=.5)
+        # significance markers
+        if metric == 'rfishz':
+            ymark = ymax - .2
+            p, pcorr = statdf.loc[var,['pval','pval_corrected']]
+            if p < .05:
+                fillstyle = 'full' if pcorr < .05 else 'none'
+                ax.plot(x,ymark,marker='*',color='k',
+                    fillstyle=fillstyle,markersize=7)
 
     ax.axhline(0,linestyle='--',linewidth=.25,color='k')
 
-    if metric == 'r':
-        ylabel = 'Correlation with DLQ1 ($\it{r}$)'
-        ymin, ymax = -1.1, 1.1
-    elif metric == 'rfishz':
-        ylabel = 'Correlation with DLQ1\n(Fisher z-transformed $\it{r}$ value)'
-        ymin, ymax = -2.2, 2.2
     ax.set_ylabel(ylabel)
     ax.set_ylim(ymin,ymax)
     ax.yaxis.set_major_locator(MultipleLocator(1))
     ax.yaxis.set_minor_locator(MultipleLocator(.25))
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
+
 
 ax.set_xticks(range(n_violins))
 xticklabels = [ xlabel_dict[var] for var in correlated_vars ]
