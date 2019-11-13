@@ -9,11 +9,13 @@
 suppressPackageStartupMessages(library(ordinal))
 suppressPackageStartupMessages(library(effects))
 suppressPackageStartupMessages(library(MASS))
+suppressPackageStartupMessages(library(rjson))
 
 
 # load data
-resdir <- "~/IDrive-Sync/proj/phenol/results"
-fname <- "~/IDrive-Sync/proj/phenol/data/data-clean.tsv"
+datadir <- fromJSON(file='./config.json')$data_directory
+resdir  <- fromJSON(file='./config.json')$results_directory
+fname <- paste(datadir,"data-clean.tsv",sep="/")
 data <- read.csv(fname,sep="\t") #na.strings='NaN')
 # only use those rows with DLQ completed
 data = data[!is.na(data$DLQ.1),]
