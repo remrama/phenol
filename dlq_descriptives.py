@@ -13,6 +13,8 @@ from os import path
 from json import load
 import pandas as pd
 
+from pingouin import pairwise_corr
+
 import matplotlib; matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt; plt.ion()
 
@@ -49,7 +51,7 @@ for i, (ax,data) in enumerate(zip(axes,[plot_data_all,plot_data_lim])):
     ax.boxplot(data,widths=.4,#positions=pd.np.arange(.5,10.5),
                patch_artist=True,showbox=True,showfliers=True,
                boxprops={'facecolor':'gainsboro'},
-               medianprops={'color':'red'})
+               medianprops={'color':'red','linewidth':1.7})
 
     # aesthetics
     ax.set_yticks([1,2,3,4,5])
@@ -76,10 +78,23 @@ for ext in ['png','svg','eps']:
 plt.close()
 
 
+#######  pairwise DLQ correlations  #######
 
-#### descriptives dataframe
+# Really just interested in correlating DLQ:1
+# with all other DLQ probes. But run them all
+# because it's easy and maybe nice to have later.
+# Dont wanna do the whole resampling thing here
+# bc it's just not that important. Get a single
+# average value per subject.
+mean_df = df.groupby('subj')[DLQ_COLS].mean()
+pwise_stats = pairwise_corr(data=mean_df,columns=DLQ_COLS,
+    method='kendall',padjust='fdr_bh')
 
-DLQ_COLS = [ f'DLQ:{i}' for i in range(1,20) ]
+stats_fname = path.join(RESDIR,'dlq_correlations-stats.tsv')
+pwise_stats.to_csv(stats_fname,index=False,sep='\t')
+
+
+#######  descriptives dataframe  #######
 
 # first get quartiles for each DLQ question
 quartile_df = df[DLQ_COLS].quantile(q=[.25,.5,.75]).T
@@ -89,15 +104,15 @@ quartile_df.columns = [ f'quantile_{x}' for x in quartile_df.columns ]
 
 # now get contingency stuff
 # go from wide to long format
-df = df.melt(value_vars=DLQ_COLS,
-             id_vars=['subj'],
-             var_name='probe',value_name='likert')
+df_melt = df.melt(value_vars=DLQ_COLS,
+                  id_vars=['subj'],
+                  var_name='probe',value_name='likert')
 
 # convert to categorical so 0s will show up in crosstab
-df['likert'] = pd.Categorical(df['likert'],categories=range(1,6),ordered=True)
+df_melt['likert'] = pd.Categorical(df_melt['likert'],categories=range(1,6),ordered=True)
 
 # make the contingency table
-cont_df = pd.crosstab(df['probe'],df['likert'],dropna=False)
+cont_df = pd.crosstab(df_melt['probe'],df_melt['likert'],dropna=False)
 
 # drop extra layer for column index
 cont_df.columns = [ f'likert-{x}' for x in cont_df.columns ]
