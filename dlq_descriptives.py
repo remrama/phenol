@@ -43,8 +43,8 @@ plot_data_all = df[DLQ_COLS].values
 plot_data_lim = df.loc[df['DLQ:1']>1,DLQ_COLS].values
 
 # open figure
-width = 14
-height = 1*len(DLQ_COLS)
+width = 12
+height = .5*len(DLQ_COLS)
 fig, axes = plt.subplots(1,2,figsize=(width,height))
 
 # loop over two datasets
@@ -55,7 +55,7 @@ for i, (ax,data) in enumerate(zip(axes,[plot_data_all,plot_data_lim])):
                showbox=True,showfliers=True,showmeans=True,meanline=True,
                boxprops={'facecolor':'gainsboro'},
                medianprops={'color':'red','linewidth':2},
-               meanprops={'color':'blue','linewidth':2})
+               meanprops={'color':'blue','linewidth':2,'linestyle':'dotted'})
 
     # aesthetics
     ax.set_xticks([1,2,3,4,5])
@@ -96,6 +96,10 @@ mean_df = df.groupby('subj')[DLQ_COLS].mean()
 pwise_stats = pairwise_corr(data=mean_df,columns=DLQ_COLS,
     method='kendall',padjust='fdr_bh')
 
+# round values while also changing output format to print full values
+for col in pwise_stats.columns:
+    fmt = '%.02f' if 'p-' in col else '%.04f'
+    pwise_stats[col] = pwise_stats[col].map(lambda x: fmt % x)
 stats_fname = path.join(RESDIR,'dlq_correlations-stats.tsv')
 pwise_stats.to_csv(stats_fname,index=False,sep='\t')
 
@@ -135,5 +139,8 @@ descr_df.index = descr_df.index.map(zero_padding)
 descr_df.sort_index(inplace=True)
 
 # export descriptives dataframe
+for col in descr_df.columns:
+    if 'quantile' in col:
+        descr_df[col] = descr_df[col].map(lambda x: '%.02f' % x)
 df_fname = path.join(RESDIR,'dlq_descriptives-data.tsv')
 descr_df.to_csv(df_fname,index=True,index_label='probe',sep='\t')
