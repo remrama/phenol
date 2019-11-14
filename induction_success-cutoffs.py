@@ -137,7 +137,7 @@ ax.set_xticks(range(2,6))
 xticklabels = [ myplt.DLQ_STRINGS[i] for i in range(2,6) ]
 xticklabels = [ x if x == 'Very much' else f'>= {x}'
                 for x in xticklabels ]
-ax.set_xticklabels(xticklabels,rotation=25)
+ax.set_xticklabels(xticklabels,rotation=25,ha='right')
 ax.set_xlabel('Lucid dream criterion')
 
 # handle yaxes
