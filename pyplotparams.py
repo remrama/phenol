@@ -17,7 +17,7 @@ matplotlib.rcParams['ytick.major.size'] = 5
 matplotlib.rcParams['legend.fontsize'] = 'small'
 matplotlib.rcParams['legend.title_fontsize'] = 'medium'
 matplotlib.rcParams['savefig.dpi'] = 300
-# matplotlib.rcParams['svg.fonttype']
+matplotlib.rcParams['svg.fonttype'] = 'none'
 
 
 #########  color map and legend stuff  #########
