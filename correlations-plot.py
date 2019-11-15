@@ -60,7 +60,8 @@ xlabel_dict = {
     'Pos Mood'      : 'Positive mood',
     'panas_pos'     : 'Positive morning affect',
     'panas_neg'     : 'Negative morning affect',
-    'dream_control' : 'Dream control'
+    'dream_control' : 'Dream control',
+    'sleepquality'  : 'Sleep quality'
 }
 # all variables have a minimum of 1, but the max is different
 low_xmax_vars = ['panas_pos','panas_neg','dream_control']
@@ -98,9 +99,9 @@ for ax, var in zip(axes.flat,correlated_vars):
     ax.set_xlim(.5,xmax+.5)
     ax.set_xticks(range(1,xmax+1))
     xticklabels = [''] * xmax
-    # dream control is 0-4 actually
-    xticklabels[0] = 1 if var != 'dream_control' else 0
-    xticklabels[-1] = xmax if var != 'dream_control' else xmax-1
+    # all scales start at 0 and end at xmax-1 (bc data is 1 higher than survey)
+    xticklabels[0] = 0
+    xticklabels[-1] = xmax-1
     ax.set_xticklabels(xticklabels)
     # ax.xaxis.set_major_locator(MultipleLocator(xmax))
     ax.spines['top'].set_visible(False)

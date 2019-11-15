@@ -6,14 +6,14 @@
     "PANAS_negative_probes" : [2,4,6,7,8,11,13,15,18,20],
     "DLQ_control_probes"    : [4,6,8,10],
 
-    "n_correlation_resamples" : 10000,
+    "n_correlation_resamples" : 1000,
 
     "variables_to_correlate" : ["Sensory","Neg Emo",
                                 "Neg Body","Neg Mood",
                                 "Bizarreness","Pos Emo",
                                 "Pos Body","Pos Mood",
                                 "panas_pos","panas_neg",
-                                "dream_control"],
+                                "dream_control","sleepquality"],
 
     "DLQ_probes" : [
         "I was aware that I was dreaming.",
