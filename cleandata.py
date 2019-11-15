@@ -176,8 +176,6 @@ _ = df.apply(checkrecall,axis=1)
 
 # rather have subj as int than float
 df['Code'] = df['Code'].astype(int)
-# reset subjects to start at 1 (for plotting)
-df['Code'] -= 1300
 
 
 
