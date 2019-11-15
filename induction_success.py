@@ -4,6 +4,7 @@ per lucidity level across all participants.
 """
 
 from os import path
+from json import load
 import pandas as pd
 from scipy import stats
 
@@ -12,12 +13,11 @@ import matplotlib.pyplot as plt; plt.ion()
 
 import pyplotparams as myplt
 
-resdir = path.expanduser('~/DBp/proj/phenoll/results')
-infname = path.join(resdir,'dlq1-frequency.tsv')
-
-
 ########  load and manipulate data  ########
-
+with open('./config.json') as f:
+    p = load(f)
+    resdir  = path.expanduser(p['results_directory'])
+infname = path.join(resdir,'dlq1-frequency.tsv')
 df = pd.read_csv(infname,sep='\t')
 
 DLQ_COLS = [ f'DLQ1_resp-{i}' for i in range(1,6) ]

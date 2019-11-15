@@ -12,6 +12,7 @@ how induction success varies as a function
 of those two things.
 """
 from os import path
+from json import load
 import pandas as pd
 
 from itertools import combinations
@@ -23,11 +24,12 @@ import matplotlib.pyplot as plt; plt.ion()
 import pyplotparams as myplt
 
 
-resdir = path.expanduser('~/DBp/proj/phenoll/results')
-infname = path.join(resdir,'dlq1-frequency.tsv')
-
 
 ########  load and manipulate data  #########
+with open('./config.json') as f:
+    p = load(f)
+    resdir  = path.expanduser(p['results_directory'])
+infname = path.join(resdir,'dlq1-frequency.tsv')
 
 data = pd.read_csv(infname,index_col='subj',sep='\t')
 
