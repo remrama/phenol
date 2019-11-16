@@ -23,3 +23,6 @@ python regression-plot_iv.py           # plot scatterplots of relationship betwe
 python correlations-resample.py
 python correlations-zscore.py
 python correlations-plot.py
+
+# export text files that put digestible structure dream reports and open questions
+python group_openquestions.py
