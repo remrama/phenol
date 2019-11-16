@@ -27,6 +27,7 @@ from json import load
 import tqdm
 import pandas as pd
 
+pd.np.random.seed(72) # for reproducibility
 
 # load analysis parameters from configuration file
 with open('./config.json') as f:
@@ -38,6 +39,7 @@ with open('./config.json') as f:
     CONTROL_PROBES = p['DLQ_control_probes']
     N_RESAMPLES = p['n_correlation_resamples']
     COLS2CORR = p['variables_to_correlate']
+    FMT = p['float_formatting']
 
 
 #######  load and manipulate data  #######
@@ -87,7 +89,7 @@ for col in tqdm.tqdm(COLS2CORR,desc='resampling correlations'):
 
 # round values while also changing output format to print full values
 for col in res_df.columns:
-    res_df[col] = res_df[col].map(lambda x: '%.04f' % x)
+    res_df[col] = res_df[col].map(lambda x: FMT % x)
 res_fname = path.join(RES_DIR,'correlations-data.tsv')
 res_df.to_csv(res_fname,index=True,sep='\t')
 

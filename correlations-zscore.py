@@ -11,6 +11,7 @@ just an additional column for the fisher zscores.
 """
 from os import path
 from json import load
+import numpy as np
 import pandas as pd
 
 from statsmodels.stats.multitest import fdrcorrection
@@ -20,6 +21,7 @@ from statsmodels.stats.multitest import fdrcorrection
 with open('./config.json') as f:
     p = load(f)
     RES_DIR  = path.expanduser(p['results_directory'])
+    FMT = p['float_formatting']
 # choose params to make 95% confidence intervals
 CI_LO = .025
 CI_HI = .975
@@ -38,8 +40,8 @@ def fisherz(x):
     # arctanh can't handle -1 or 1 so this function accounts for that
     if x in [-1,1]:
         # multiply by x to 
-        x -= pd.np.sign(x) * .000001 # picked 6 decimal points bc that's the precision of other values
-    return pd.np.arctanh(x)
+        x -= np.sign(x) * .000001 # picked 6 decimal points bc that's the precision of other values
+    return np.arctanh(x)
 res_df['rfishz'] = res_df['r'].map(fisherz)
 
 # initialize stats dataframe with the mean of each metric
@@ -51,7 +53,16 @@ for col in ['r','rfishz']:
     stats_df[f'{col}_cihi'] = res_df.groupby('probe')[col].quantile(CI_HI)
 
 # add pvalue based on fisher zscore
-stats_df['pval'] = res_df.groupby('probe').agg({'rfishz':lambda col: pd.np.mean(col<0)})
+def calculate_pvalue(col):
+    # p = % of values > or < 0
+    # double the smaller p value (bc two-tailed test)
+    # add 1 (or -1) to account for zero scores above/below
+    proportion_above = np.mean( np.append(col.values, 1) > 0 )
+    proportion_below = np.mean( np.append(col.values,-1) < 0 )
+    above_or_below = min([proportion_above,proportion_below])
+    pvalue = 2 * above_or_below
+    return pvalue
+stats_df['pval'] = res_df.groupby('probe').agg({'rfishz':calculate_pvalue})
 
 # generate a pvalue accounting for multiple comparisons
 uncorrected_pvals = stats_df['pval'].values
@@ -64,7 +75,7 @@ stats_df['pval_corrected'] = corrp
 # round values while also changing output format to print full values
 for df in [stats_df,res_df]:
     for col in df.columns:
-        df[col] = df[col].map(lambda x: '%.04f' % x)
+        df[col] = df[col].map(lambda x: FMT % x)
 
 stats_fname = path.join(RES_DIR,'correlations-stats.tsv')
 stats_df.to_csv(stats_fname,index=True,sep='\t')
