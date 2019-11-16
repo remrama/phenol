@@ -47,7 +47,9 @@ stats_df.loc['across_nonzeroDLQ1',['test','chisq','pval']] = ['chisquare',chisq,
 # since we also highlight how it depends on how
 # you measure success. But run this just to be able
 # to say there were about half LDs
-obs = [ freqs[0], sum(nonzero_opts) ]
+nonlucid = freqs[0]
+nonzero_lucid = sum(nonzero_opts)
+obs = [nonlucid,nonzero_lucid]
 p = stats.binom_test(obs,p=0.5,alternative='two-sided')
 stats_df.loc['zeroVSnonzero_DLQ1',['test','chisq','pval']] = ['binomial',pd.np.nan,p]
 
@@ -78,7 +80,7 @@ stats_df.to_csv(stats_fname,index=True,sep='\t')
 #         markers.append(mark)
 
 
-##########  draw it  ###########
+##########  draw all frequencies  ###########
 
 fig, ax = plt.subplots(figsize=(4,7))
 
@@ -109,3 +111,35 @@ for ext in ['png','svg','eps']:
     plot_fname = path.join(resdir,f'induction_success-plot.{ext}')
     plt.savefig(plot_fname)
 plt.close()
+
+
+
+##########  draw just nonlucid vs nonzero_lucid frequencies  ###########
+
+fig, ax = plt.subplots(figsize=(4,7))
+
+colors = [ myplt.dlqcolor(1), 'gray' ]
+xvals = [1,2]
+yvals = [nonlucid,nonzero_lucid]
+ax.bar(xvals,yvals,color=colors,edgecolor='k',width=1,linewidth=.5)
+
+ax.set_xlim(.25,2.75)
+ax.set_ylim(0,max(yvals)+1)
+# ax.set_yticks(range(0,max(yvals)))
+ax.set_xticks([1,2])
+first_ticklabel = list(myplt.DLQ_STRINGS.values())[0]
+second_ticklabel = '>= ' + list(myplt.DLQ_STRINGS.values())[1]
+xticklabels = [first_ticklabel,second_ticklabel]
+ax.set_xticklabels(xticklabels,rotation=25,ha='right')
+ax.set_ylabel('Number of nights')
+ax.set_xlabel('I was aware that I was dreaming.')
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+
+plt.tight_layout()
+
+for ext in ['png','svg','eps']:
+    plot_fname = path.join(resdir,f'induction_success-plot_nonzero.{ext}')
+    plt.savefig(plot_fname)
+plt.close()
+
