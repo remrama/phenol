@@ -17,6 +17,7 @@ import pyplotparams as myplt
 with open('./config.json') as f:
     p = load(f)
     resdir  = path.expanduser(p['results_directory'])
+    FMT = p['float_formatting']
 infname = path.join(resdir,'dlq1-frequency.tsv')
 df = pd.read_csv(infname,sep='\t')
 
@@ -53,11 +54,9 @@ obs = [nonlucid,nonzero_lucid]
 p = stats.binom_test(obs,p=0.5,alternative='two-sided')
 stats_df.loc['zeroVSnonzero_DLQ1',['test','chisq','pval']] = ['binomial',pd.np.nan,p]
 
-# round values while also changing output format to print full values
-stats_df['chisq'] = stats_df['chisq'].map(lambda x: '%.02f' % x)
-stats_df['pval'] = stats_df['pval'].map(lambda x: '%.04f' % x)
-
 # export stats dataframe
+stats_df['chisq'] = stats_df['chisq'].map(lambda x: FMT % x)
+stats_df['pval']  = stats_df['pval'].map(lambda x: FMT % x)
 stats_fname = path.join(resdir,'induction_success-stats.tsv')
 stats_df.to_csv(stats_fname,index=True,sep='\t')
 
