@@ -29,6 +29,7 @@ import pyplotparams as myplt
 with open('./config.json') as f:
     p = load(f)
     resdir  = path.expanduser(p['results_directory'])
+    FMT = p['float_formatting']
 infname = path.join(resdir,'dlq1-frequency.tsv')
 
 data = pd.read_csv(infname,index_col='subj',sep='\t')
@@ -101,8 +102,8 @@ for label, n_obs in cond_dict.items():
         i += 1
 
 # round values while also changing output format to print full values
-stats_df['zval'] = stats_df['zval'].map(lambda x: '%.02f' % x)
-stats_df['pval'] = stats_df['pval'].map(lambda x: '%.04f' % x)
+stats_df['zval'] = stats_df['zval'].map(lambda x: FMT % x)
+stats_df['pval'] = stats_df['pval'].map(lambda x: FMT % x)
 
 
 # export data and results dataframes
