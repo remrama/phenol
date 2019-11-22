@@ -69,7 +69,7 @@ xlims_dict = { var: 5 if var in low_xmax_vars else 10
     for var in xlabel_dict.keys() }
 
 # set it up so everything will be ordered by correlation effect
-statdf.sort_values('rfishz_mean',ascending=False,inplace=True)
+statdf.sort_values('fishz_mean',ascending=False,inplace=True)
 
 # extract all the columns/variables that we correlated
 correlated_vars = statdf.index
@@ -144,13 +144,13 @@ width = 1 * n_violins
 fig, axes = plt.subplots(2,1,figsize=(width,10),
                          sharex=True,sharey=False)
 
-for ax, metric in zip(axes,['r','rfishz']):
+for ax, metric in zip(axes,['tau','fishz']):
 
-    if metric == 'r':
-        ylabel = 'Correlation with DLQ1 ($\it{r}$)'
+    if metric == 'tau':
+        ylabel = 'Correlation with DLQ1 ($\tau$)'
         ymin, ymax = -1, 1
-    elif metric == 'rfishz':
-        ylabel = 'Correlation with DLQ1\n(Fisher z-transformed $\it{r}$ value)'
+    elif metric == 'fishz':
+        ylabel = 'Correlation with DLQ1\n(Fisher $\it{z}$)'
         ymin, ymax = -2.2, 2.2
 
     violin_data = [ rsmpdf.loc[var,metric].values for var in correlated_vars ]
@@ -167,7 +167,7 @@ for ax, metric in zip(axes,['r','rfishz']):
         ax.errorbar(x,y,yerr,marker='o',color='k',markersize=1,
                     capsize=1,capthick=0,linewidth=.5)
         # significance markers
-        if metric == 'rfishz':
+        if metric == 'fishz':
             ymark = ymax - .2
             p, pcorr = statdf.loc[var,['pval','pval_corrected']]
             if p < .05:

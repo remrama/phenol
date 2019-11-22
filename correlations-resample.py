@@ -62,7 +62,7 @@ df['dream_control'] = df[control_cols].mean(axis=1)
 #######  analysis  #######
 
 # build dataframe to hold all the resampled correlations
-METRICS = ['slope','intercept','r']
+METRICS = ['slope','intercept','tau']
 INDEX_NAMES = ['probe','resample']
 index_values = [COLS2CORR,range(N_RESAMPLES)]
 index = pd.MultiIndex.from_product(index_values,names=INDEX_NAMES)
