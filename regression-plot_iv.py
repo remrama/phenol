@@ -4,6 +4,7 @@ Each on its own axis.
 """
 
 from os import path
+from json import load
 import pandas as pd
 
 import matplotlib; matplotlib.use('Qt5Agg') # python3 bug
@@ -12,11 +13,14 @@ import seaborn as sea
 
 import pyplotparams as myplt
 
-datadir = path.expanduser('~/IDrive-Sync/proj/phenol/data')
-resdir  = path.expanduser('~/IDrive-Sync/proj/phenol/results')
+
+with open('./config.json') as f:
+    p = load(f)
+    datadir = path.expanduser(p['data_directory'])
+    resdir  = path.expanduser(p['results_directory'])
 
 infname = path.join(datadir,'data-clean.tsv')
-outfname = path.join(resdir,'results_regression-scatter.png')
+outfname = path.join(resdir,'ldim_adherence-scatter.png')
 
 df = pd.read_csv(infname,sep='\t')
 

@@ -39,7 +39,7 @@ data$DLQ.1 <- factor(data$DLQ.1,ordered=TRUE)
 
 # build/run ordinal regression
 model.fit <- clmm(DLQ.1 ~ (1|subj)
-    + n_rcs + mildlength + wbtblength + bedtime_int,
+    + n_rcs + mildlength + wbtblength,
     data=data)
 print(summary(model.fit))
 # get odds ratios by taking exponent of the coefficients
@@ -48,10 +48,10 @@ outdf <- exp(cbind(OddsRatio=coef(model.fit),confint(model.fit)))
 # add pvalue from regression model
 outdf <- cbind(outdf,pval=summary(model.fit)$coefficients[,"Pr(>|z|)"])
 # drop the useless stuff and export
-predictors = c("n_rcs","mildlength","wbtblength","bedtime_int")
+predictors = c("n_rcs","mildlength","wbtblength")
 outdf <- outdf[predictors,]
 # export ordinal regression model
-outfname <- paste(resdir,"results_regression-coefficients.tsv",sep="/")
+outfname <- paste(resdir,"ldim_adherence-coefficients.tsv",sep="/")
 write.table(outdf,file=outfname,row.names=TRUE,col.names=NA,sep="\t")
 
 
@@ -67,5 +67,5 @@ outeffdata <- cbind(outeffdata,mildlength=mildlength_vals)
 # rename them too
 colnames(outeffdata) <- gsub("X","DLQ",colnames(outeffdata))
 
-efffname <- paste(resdir,"results_regression-effects.tsv",sep="/")
+efffname <- paste(resdir,"ldim_adherence-effects.tsv",sep="/")
 write.table(outeffdata,file=efffname,row.names=FALSE,col.names=TRUE,sep="\t")

@@ -3,6 +3,7 @@ Plot the ordinal regression model output for MILD length.
 """
 
 from os import path
+from json import load
 import pandas as pd
 
 import matplotlib; matplotlib.use('Qt5Agg') # python3 bug
@@ -10,8 +11,12 @@ import matplotlib.pyplot as plt; plt.ion()
 
 import pyplotparams as myplt
 
-resdir = path.expanduser('~/DBp/IDrive-Sync/phenol/results')
-infname = path.join(resdir,'results_regression-effects.tsv')
+
+with open('./config.json') as f:
+    p = load(f)
+    resdir  = path.expanduser(p['results_directory'])
+
+infname = path.join(resdir,'ldim_adherence-effects.tsv')
 
 
 #########  load and manipulate data  #########
