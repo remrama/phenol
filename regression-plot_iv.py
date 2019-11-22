@@ -24,24 +24,21 @@ outfname = path.join(resdir,'ldim_adherence-scatter.png')
 
 df = pd.read_csv(infname,sep='\t')
 
-PREDICTORS = ['mildlength','n_rcs','wbtblength','bedtime_int']
+PREDICTORS = ['mildlength','n_rcs','wbtblength']
 XLABELS = dict(
     mildlength='MILD length (minutes)',
     n_rcs='Number of reality checks',
     wbtblength='WBTB length (minutes)',
-    bedtime_int='Hours away from midnight',
 )
 XTICKS_MAJOR = dict(
     mildlength=pd.np.linspace(0,20,5),
     n_rcs=[0,5,10],
     wbtblength=pd.np.linspace(0,60,4),
-    bedtime_int=[-10,-5,0,5,10],
 )
 XTICKS_MINOR = dict(
     mildlength=pd.np.linspace(0,20,21),
     n_rcs=pd.np.linspace(0,13,14),
     wbtblength=pd.np.linspace(0,60,13),
-    bedtime_int=pd.np.linspace(-13,13,27),
 )
 
 # # only keep rows with recall
@@ -50,7 +47,7 @@ XTICKS_MINOR = dict(
 
 palette = { x: myplt.dlqcolor(x) for x in myplt.DLQ_STRINGS.keys() }
 
-fig, axes = plt.subplots(1,len(PREDICTORS),figsize=(7*len(PREDICTORS),6))
+fig, axes = plt.subplots(1,len(PREDICTORS),figsize=(5*len(PREDICTORS),6))
 
 for i, (ax,col) in enumerate(zip(axes,PREDICTORS)):
 
