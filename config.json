@@ -9,13 +9,6 @@
     "n_correlation_resamples" : 1000,
     "float_formatting"        : "%.03f",
 
-    "variables_to_correlate" : ["Sensory","Neg Emo",
-                                "Neg Body","Neg Mood",
-                                "Bizarreness","Pos Emo",
-                                "Pos Body","Pos Mood",
-                                "panas_pos","panas_neg",
-                                "dream_control","sleepquality"],
-
     "DLQ_probes" : [
         "I was aware that I was dreaming.",
         "I was aware that my physical body was asleep.",

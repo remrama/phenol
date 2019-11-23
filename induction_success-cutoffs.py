@@ -22,6 +22,7 @@ import matplotlib; matplotlib.use('Qt5Agg') # python3 bug
 import matplotlib.pyplot as plt; plt.ion()
 
 import pyplotparams as myplt
+from matplotlib.ticker import MultipleLocator
 
 
 
@@ -30,9 +31,9 @@ with open('./config.json') as f:
     p = load(f)
     resdir  = path.expanduser(p['results_directory'])
     FMT = p['float_formatting']
-infname = path.join(resdir,'dlq1-frequency.tsv')
+infname = path.join(resdir,'dlq01-frequencies.tsv')
 
-data = pd.read_csv(infname,index_col='subj',sep='\t')
+data = pd.read_csv(infname,index_col='participant_id',sep='\t')
 
 n_reports = data.values.sum() # total number of reports
 n_dreams = data.iloc[:,1:].values.sum() # all reports that include dream recall
@@ -48,7 +49,7 @@ cumsum_df = data[cumsum_cols].cumsum(axis=1)
 
 # don't use response of 1 ("Not at all") or "No recall"
 # flip it for interpretability
-DLQ_COLS = [ f'DLQ1_resp-{i}' for i in range(2,6) ]
+DLQ_COLS = [ f'DLQ01_resp-{i}' for i in range(1,5) ]
 
 index = pd.Index(DLQ_COLS,name='cutoff')
 columns = ['dreams_past_cutoff','subjs_past_cutoff']
@@ -128,31 +129,27 @@ for col in df.columns:
     if 'proportion' in col:
         key = col.split('_')[1]
         yvals = df[col].values
-        ax.plot(range(2,6),yvals,
+        ax.plot(range(1,5),yvals,
             color='k',linestyle='-',linewidth=1,zorder=1)
-        ax.scatter(range(2,6),yvals,
-            color=[ myplt.dlqcolor(i) for i in range(2,6) ],
+        ax.scatter(range(1,5),yvals,
+            color=[ myplt.dlqcolor(i) for i in range(1,5) ],
             marker=markers[key],edgecolors='w',
             s=150,zorder=2,linewidths=.5)
 
 # handle the xaxis
-ax.set_xticks(range(2,6))
-xticklabels = [ myplt.DLQ_STRINGS[i] for i in range(2,6) ]
+ax.set_xticks(range(1,5))
+xticklabels = [ myplt.DLQ_STRINGS[i] for i in range(1,5) ]
 xticklabels = [ x if x == 'Very much' else f'>= {x}'
                 for x in xticklabels ]
 ax.set_xticklabels(xticklabels,rotation=25,ha='right')
 ax.set_xlabel('Lucid dream criterion')
 
 # handle yaxes
-minor_yticks = pd.np.linspace(0,1,21)
-major_yticks = pd.np.linspace(0,1,11)
-# label yticks with percentages
-# major_yticklabels = [ '{:.0f}'.format(x*100) for x in major_yticks ]
-ax.set_yticks(minor_yticks,minor=True)
-ax.set_xlim(1.5,5.5)
+ax.yaxis.set_major_locator(MultipleLocator(.1))
+ax.yaxis.set_minor_locator(MultipleLocator(.05))
+ax.set_xlim(0.5,4.5)
 ax.set_ylim(0,1)
-ax.set_yticks(major_yticks)
-ax.set_ylabel('Lucid dream induction success')
+ax.set_ylabel('Lucidity induction success')
 # ax.set_yticklabels(major_yticklabels)
 ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)

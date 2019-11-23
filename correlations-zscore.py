@@ -48,22 +48,18 @@ res_df['fishz'] = res_df['tau'].map(fisherz)
 # initialize stats dataframe with the mean of each metric
 stats_df = res_df.groupby('probe').mean()
 stats_df.columns = [ f'{c}_mean' for c in stats_df.columns ]
-# add confidence intervals for r ans fisherz r values
-for col in ['tau','fishz']:
-    stats_df[f'{col}_cilo'] = res_df.groupby('probe')[col].quantile(CI_LO)
-    stats_df[f'{col}_cihi'] = res_df.groupby('probe')[col].quantile(CI_HI)
+# get confidence intervals for fisherz values
+stats_df['fishz_cilo'] = res_df.groupby('probe')['fishz'].quantile(CI_LO)
+stats_df['fishz_cihi'] = res_df.groupby('probe')['fishz'].quantile(CI_HI)
 
 # add pvalue based on fisher zscore
 def calculate_pvalue(col):
     # p = % of values > or < 0
     # double the smaller p value (bc two-tailed test)
-    # add 1 (or -1) t
     proportion_above = np.mean( col.values > 0 )
     proportion_below = np.mean( col.values < 0 )
     above_or_below = min([proportion_above,proportion_below])
     pval = 2 * above_or_below
-    if pval == 0:
-        pval = 1 / N_RESAMPLES # to account for zero scores above/below
     return pval
 stats_df['pval'] = res_df.groupby('probe').agg({'fishz':calculate_pvalue})
 

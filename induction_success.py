@@ -18,16 +18,16 @@ with open('./config.json') as f:
     p = load(f)
     resdir  = path.expanduser(p['results_directory'])
     FMT = p['float_formatting']
-infname = path.join(resdir,'dlq1-frequency.tsv')
+infname = path.join(resdir,'dlq01-frequencies.tsv')
 df = pd.read_csv(infname,sep='\t')
 
-DLQ_COLS = [ f'DLQ1_resp-{i}' for i in range(1,6) ]
+DLQ_COLS = [ f'DLQ01_resp-{i}' for i in range(5) ]
 freqs = df[DLQ_COLS].sum(axis=0).values
 
 
 ##########  stats on the frequencies  ###########
 
-comparisons = ['across_DLQ1','across_nonzeroDLQ1','zeroVSnonzero_DLQ1']
+comparisons = ['across_DLQ01','across_nonzeroDLQ01','zeroVSnonzero_DLQ01']
 index = pd.Index(comparisons,name='comparison')
 stats_df = pd.DataFrame(columns=['test','chisq','pval'],index=index)
 
@@ -36,12 +36,12 @@ stats_df = pd.DataFrame(columns=['test','chisq','pval'],index=index)
 
 # is there a difference among the whole DLQ score?
 chisq, p = stats.chisquare(freqs)
-stats_df.loc['across_DLQ1',['test','chisq','pval']] = ['chisquare',chisq,p]
+stats_df.loc['across_DLQ01',['test','chisq','pval']] = ['chisquare',chisq,p]
 
 # is there a difference among the lucidity options (non-zero)?
 nonzero_opts = freqs[1:]
 chisq, p = stats.chisquare(nonzero_opts)
-stats_df.loc['across_nonzeroDLQ1',['test','chisq','pval']] = ['chisquare',chisq,p]
+stats_df.loc['across_nonzeroDLQ01',['test','chisq','pval']] = ['chisquare',chisq,p]
 
 # compare if half the nights had LDs or not**
 # but note that we don't really care about this,
@@ -52,7 +52,7 @@ nonlucid = freqs[0]
 nonzero_lucid = sum(nonzero_opts)
 obs = [nonlucid,nonzero_lucid]
 p = stats.binom_test(obs,p=0.5,alternative='two-sided')
-stats_df.loc['zeroVSnonzero_DLQ1',['test','chisq','pval']] = ['binomial',pd.np.nan,p]
+stats_df.loc['zeroVSnonzero_DLQ01',['test','chisq','pval']] = ['binomial',pd.np.nan,p]
 
 # export stats dataframe
 stats_df['chisq'] = stats_df['chisq'].map(lambda x: FMT % x)
@@ -86,14 +86,14 @@ fig, ax = plt.subplots(figsize=(4,7))
 # for x, y, m in zip(xvals,yvals,markers):
 #     c = myplt.dlqcolor(x)
 #     ax.scatter(x,y,color=c,marker=m,edgecolors='k',linewidths=.5,s=85)
-colors = [ myplt.dlqcolor(i) for i in range(1,6) ]
-xvals = range(1,6)
+colors = [ myplt.dlqcolor(i) for i in range(5) ]
+xvals = range(5)
 ax.bar(xvals,freqs,color=colors,edgecolor='k',width=1,linewidth=.5)
 
-ax.set_xlim(.25,5.75)
+ax.set_xlim(-.75,4.75)
 ax.set_ylim(0,max(freqs)+1)
 # ax.set_yticks(range(0,max(yvals)))
-ax.set_xticks([1,2,3,4,5])
+ax.set_xticks(range(5))
 ax.set_xticklabels(list(myplt.DLQ_STRINGS.values()),rotation=25,ha='right')
 ax.set_ylabel('Number of nights')
 ax.set_xlabel('I was aware that I was dreaming.')
@@ -117,7 +117,7 @@ plt.close()
 
 fig, ax = plt.subplots(figsize=(4,7))
 
-colors = [ myplt.dlqcolor(1), 'gray' ]
+colors = [ myplt.dlqcolor(0), 'gray' ]
 xvals = [1,2]
 yvals = [nonlucid,nonzero_lucid]
 ax.bar(xvals,yvals,color=colors,edgecolor='k',width=1,linewidth=.5)

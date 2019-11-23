@@ -28,27 +28,22 @@ with open('./config.json') as f:
     resdir  = path.expanduser(p['results_directory'])
 
 
-COLS2KEEP = ['subj','sess','DLQ:1','dreamreport:1','Open:1','Open:2','Open:3','Open:4']
-fname = path.join(datadir,'data-clean.tsv')
+COLS2KEEP = ['night_id','DLQ_01','dream_report',
+    'INTERR_1','INTERR_2','INTERR_3','INTERR_4']
+fname = path.join(datadir,'data.tsv')
 df = pd.read_csv(fname,usecols=COLS2KEEP,sep='\t')
-
-# create a night_id that has subject and night in it
-df['sess'] = df['sess'].astype(int)
-df['night_id'] = df.apply(lambda row: '{}-{}'.format(row['subj'],row['sess']),axis=1)
-df.drop(columns=['subj','sess'],inplace=True)
-
 
 
 # drop nights without dream recall
-df = df[ df['dreamreport:1'] != 'No recall' ]
+df.dropna(subset=['dream_report'],axis=0,inplace=True)
 
-df['DLQ:1'] = df['DLQ:1'].astype(int)
+df['DLQ_01'] = df['DLQ_01'].astype(int)
 
-df.rename(columns={'dreamreport:1':'Open:0'},inplace=True)
+df.rename(columns={'dream_report':'INTERR_0'},inplace=True)
 
 
-ID_COLS = ['night_id','DLQ:1']
-VAL_COLS = ['Open:0','Open:1','Open:2','Open:3','Open:4']
+ID_COLS = ['night_id','DLQ_01']
+VAL_COLS = [ f'INTERR_{x}' for x in range(5) ]
 melted_df = df.melt(id_vars=ID_COLS,value_vars=VAL_COLS,
                     var_name='probe',value_name='response')
 
@@ -60,8 +55,8 @@ melted_df = df.melt(id_vars=ID_COLS,value_vars=VAL_COLS,
 #     ('Open:4'        , "Describe the sections of your dream report that were relevant to your responding to this question, and explain why."),
 # ])
 
-SORT_ORDERS = dict(byresp=['DLQ:1','probe'],
-                   byprobe=['probe','DLQ:1'])
+SORT_ORDERS = dict(byresp=['DLQ_01','probe'],
+                   byprobe=['probe','DLQ_01'])
 
 for key, sort_order in SORT_ORDERS.items():
     top_col, bot_col = sort_order

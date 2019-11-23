@@ -38,24 +38,29 @@ with open('./config.json') as f:
     NEG_PROBES = p['PANAS_negative_probes']
     CONTROL_PROBES = p['DLQ_control_probes']
     N_RESAMPLES = p['n_correlation_resamples']
-    COLS2CORR = p['variables_to_correlate']
     FMT = p['float_formatting']
 
 
 #######  load and manipulate data  #######
 
-infname = path.join(DATA_DIR,'data-clean.tsv')
+infname = path.join(DATA_DIR,'data.tsv')
 df = pd.read_csv(infname,sep='\t')
 
 # drop all nights without recall
-df = df[df['dreamreport:1']!='No recall']
+df.dropna(subset=['dream_report'],axis=0,inplace=True)
+
+# pick columns to run correlation on
+cols2corr = [ col for col in df.columns if 'CHAR' in col ]
+cols2corr.append('PANAS_pos')
+cols2corr.append('PANAS_neg')
+cols2corr.append('dream_control')
 
 # generate columns that require manipulations of the raw data
-panas_pos_cols = [ f'Affect:{x}' for x in POS_PROBES ]
-panas_neg_cols = [ f'Affect:{x}' for x in NEG_PROBES ]
-control_cols   = [ f'DLQ:{x}' for x in CONTROL_PROBES ]
-df['panas_pos']     = df[panas_pos_cols].mean(axis=1)
-df['panas_neg']     = df[panas_neg_cols].mean(axis=1)
+panas_pos_cols = [ f'PANAS_{x:02d}' for x in POS_PROBES ]
+panas_neg_cols = [ f'PANAS_{x:02d}' for x in NEG_PROBES ]
+control_cols   = [ f'DLQ_{x:02d}' for x in CONTROL_PROBES ]
+df['PANAS_pos']     = df[panas_pos_cols].mean(axis=1)
+df['PANAS_neg']     = df[panas_neg_cols].mean(axis=1)
 df['dream_control'] = df[control_cols].mean(axis=1)
 
 
@@ -64,22 +69,23 @@ df['dream_control'] = df[control_cols].mean(axis=1)
 # build dataframe to hold all the resampled correlations
 METRICS = ['slope','intercept','tau']
 INDEX_NAMES = ['probe','resample']
-index_values = [COLS2CORR,range(N_RESAMPLES)]
+index_values = [cols2corr,range(N_RESAMPLES)]
 index = pd.MultiIndex.from_product(index_values,names=INDEX_NAMES)
 res_df = pd.DataFrame(columns=METRICS,index=index,dtype=float)
 
 # loop over each variable of interest and run N
 # correlations, resampling a random night from
 # each participant every time
-for col in tqdm.tqdm(COLS2CORR,desc='resampling correlations'):
+for col in tqdm.tqdm(cols2corr,desc='resampling correlations'):
     for i in tqdm.trange(N_RESAMPLES,desc=col):
         # sample one night from each subject, randomly
-        rsmpl_df = df.groupby('subj').apply(lambda df: df.sample(1))[['DLQ:1',col]]
+        rsmpl_df = df.groupby('participant_id').apply(
+            lambda df: df.sample(1))[['DLQ_01',col]]
         # correlate col/var with DLQ1
         r = rsmpl_df.corr(method='kendall').values[0,1]
         # get the slope/intercept for later plotting
         x = rsmpl_df[col].values
-        y = rsmpl_df['DLQ:1'].values
+        y = rsmpl_df['DLQ_01'].values
         m, b = pd.np.polyfit(x,y,1)
         # save to dataframe
         res_df.loc[(col,i),METRICS] = [m,b,r]

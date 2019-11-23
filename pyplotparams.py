@@ -22,17 +22,17 @@ matplotlib.rcParams['svg.fonttype'] = 'none'
 
 #########  color map and legend stuff  #########
 
-dlqmin, dlqspan = 1, 4
+dlqmin, dlqspan = 0, 4
 cmap = matplotlib.pyplot.cm.get_cmap('Blues')
 dlqcolor = lambda x: cmap((x-dlqmin)/dlqspan)
 
 NORECALL_COLOR = 'gainsboro'
 DLQ_STRINGS = {
-    1: 'Not at all',
-    2: 'Just a little',
-    3: 'Moderately',
-    4: 'Pretty much',
-    5: 'Very much',
+    0: 'Not at all',
+    1: 'Just a little',
+    2: 'Moderately',
+    3: 'Pretty much',
+    4: 'Very much',
 }
 
 dlqpatches = [ matplotlib.patches.Patch(

@@ -26,7 +26,7 @@ with open('./config.json') as f:
     neg_probes = p['PANAS_negative_probes']
     control_probes = p['DLQ_control_probes']
 
-data_fname = path.join(datadir,'data-clean.tsv')
+data_fname = path.join(datadir,'data.tsv')
 resample_fname = path.join(resdir,'correlations-data.tsv')
 stats_fname = path.join(resdir,'correlations-stats.tsv')
 
@@ -36,11 +36,11 @@ statdf = pd.read_csv(stats_fname,sep='\t',index_col='probe')
 
 # manipulate data SAME WAY was done in the correlation script
 # generate columns that require manipulations of the raw data
-panas_pos_cols = [ f'Affect:{x}' for x in pos_probes ]
-panas_neg_cols = [ f'Affect:{x}' for x in neg_probes ]
-control_cols   = [ f'DLQ:{x}' for x in control_probes ]
-datadf['panas_pos']     = datadf[panas_pos_cols].mean(axis=1)
-datadf['panas_neg']     = datadf[panas_neg_cols].mean(axis=1)
+panas_pos_cols = [ f'PANAS_{x:02d}' for x in pos_probes ]
+panas_neg_cols = [ f'PANAS_{x:02d}' for x in neg_probes ]
+control_cols   = [ f'DLQ_{x:02d}' for x in control_probes ]
+datadf['PANAS_pos']     = datadf[panas_pos_cols].mean(axis=1)
+datadf['PANAS_neg']     = datadf[panas_neg_cols].mean(axis=1)
 datadf['dream_control'] = datadf[control_cols].mean(axis=1)
 
 
@@ -50,21 +50,21 @@ datadf['dream_control'] = datadf[control_cols].mean(axis=1)
 palette = { x: myplt.dlqcolor(x) for x in myplt.DLQ_STRINGS.keys() }
 
 xlabel_dict = {
-    'Sensory'       : 'Sensory vividness',
-    'Bizarreness'   : 'Bizarreness',
-    'Neg Emo'       : 'Negative emotion',
-    'Neg Body'      : 'Negative body',
-    'Neg Mood'      : 'Negative mood',
-    'Pos Emo'       : 'Positive emotion',
-    'Pos Body'      : 'Positive body',
-    'Pos Mood'      : 'Positive mood',
-    'panas_pos'     : 'Positive morning affect',
-    'panas_neg'     : 'Negative morning affect',
-    'dream_control' : 'Dream control',
-    'sleepquality'  : 'Sleep quality'
+    'CHAR_sensory'       : 'Dream sensory vividness',
+    'CHAR_bizarreness'   : 'Dream bizarreness',
+    'CHAR_neg_emo'       : 'Dream negative emotion',
+    'CHAR_neg_body'      : 'Dream negative body',
+    'CHAR_neg_mood'      : 'Waking negative mood',
+    'CHAR_pos_emo'       : 'Dream positive emotion',
+    'CHAR_pos_body'      : 'Dream positive body',
+    'CHAR_pos_mood'      : 'Waking positive mood',
+    'PANAS_pos'          : 'Positive morning affect',
+    'PANAS_neg'          : 'Negative morning affect',
+    'dream_control'      : 'Dream control',
+    'sleep_quality'      : 'Subjective sleep quality'
 }
 # all variables have a minimum of 1, but the max is different
-low_xmax_vars = ['panas_pos','panas_neg','dream_control']
+low_xmax_vars = ['PANAS_pos','PANAS_neg','dream_control']
 xlims_dict = { var: 5 if var in low_xmax_vars else 10
     for var in xlabel_dict.keys() }
 
@@ -89,20 +89,20 @@ for ax, var in zip(axes.flat,correlated_vars):
     xlabel = xlabel_dict[var]
     
     # scatterplot
-    sea.swarmplot(y='DLQ:1',x=var,data=datadf,
+    sea.swarmplot(y='DLQ_01',x=var,data=datadf,
         size=6,linewidth=1,#jitter=.2,
         palette=palette,orient='h',ax=ax)
 
     ax.invert_yaxis()
     ax.set_yticks(range(0,5))
     ax.set_ylim(-.5,4.5)
-    ax.set_xlim(.5,xmax+.5)
-    ax.set_xticks(range(1,xmax+1))
+    # ax.set_xlim(.5,xmax+.5)
+    # ax.set_xticks(range(1,xmax+1))
     xticklabels = [''] * xmax
     # all scales start at 0 and end at xmax-1 (bc data is 1 higher than survey)
     xticklabels[0] = 0
     xticklabels[-1] = xmax-1
-    ax.set_xticklabels(xticklabels)
+    # ax.set_xticklabels(xticklabels)
     # ax.xaxis.set_major_locator(MultipleLocator(xmax))
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
@@ -141,48 +141,39 @@ plt.close()
 
 n_violins = n_axes
 width = 1 * n_violins
-fig, axes = plt.subplots(2,1,figsize=(width,10),
-                         sharex=True,sharey=False)
+fig, ax = plt.subplots(figsize=(width,5))
 
-for ax, metric in zip(axes,['tau','fishz']):
+ymin, ymax = -2.2, 2.2
 
-    if metric == 'tau':
-        ylabel = 'Correlation with DLQ1 ($\tau$)'
-        ymin, ymax = -1, 1
-    elif metric == 'fishz':
-        ylabel = 'Correlation with DLQ1\n(Fisher $\it{z}$)'
-        ymin, ymax = -2.2, 2.2
+violin_data = [ rsmpdf.loc[var,'fishz'].values for var in correlated_vars ]
+viols = ax.violinplot(violin_data,positions=range(n_violins),
+                      widths=pd.np.repeat(.5,n_violins),
+                      showextrema=False)
+plt.setp(viols['bodies'],facecolor='gray',edgecolor='white')
 
-    violin_data = [ rsmpdf.loc[var,metric].values for var in correlated_vars ]
-    viols = ax.violinplot(violin_data,positions=range(n_violins),
-                          widths=pd.np.repeat(.5,n_violins),
-                          showextrema=False)
-    plt.setp(viols['bodies'],facecolor='gray',edgecolor='white')
+# add error bars of 95% CI
+for x, var in enumerate(correlated_vars):
+    ci = statdf.loc[var,['fishz_cilo','fishz_cihi']].values
+    y = statdf.loc[var,'fishz_mean']
+    yerr = abs( ci.reshape(2,1) - y )
+    ax.errorbar(x,y,yerr,marker='o',color='k',markersize=1,
+                capsize=1,capthick=0,linewidth=.5)
+    # significance markers
+    ymark = ymax - .2
+    p, pcorr = statdf.loc[var,['pval','pval_corrected']]
+    if p < .05:
+        fillstyle = 'full' if pcorr < .05 else 'none'
+        ax.plot(x,ymark,marker='*',color='k',
+            fillstyle=fillstyle,markersize=7)
 
-    # add error bars of 95% CI
-    for x, var in enumerate(correlated_vars):
-        ci = statdf.loc[var,[f'{metric}_cilo',f'{metric}_cihi']].values
-        y = statdf.loc[var,f'{metric}_mean']
-        yerr = abs( ci.reshape(2,1) - y )
-        ax.errorbar(x,y,yerr,marker='o',color='k',markersize=1,
-                    capsize=1,capthick=0,linewidth=.5)
-        # significance markers
-        if metric == 'fishz':
-            ymark = ymax - .2
-            p, pcorr = statdf.loc[var,['pval','pval_corrected']]
-            if p < .05:
-                fillstyle = 'full' if pcorr < .05 else 'none'
-                ax.plot(x,ymark,marker='*',color='k',
-                    fillstyle=fillstyle,markersize=7)
+ax.axhline(0,linestyle='--',linewidth=.25,color='k')
 
-    ax.axhline(0,linestyle='--',linewidth=.25,color='k')
-
-    ax.set_ylabel(ylabel)
-    ax.set_ylim(ymin,ymax)
-    ax.yaxis.set_major_locator(MultipleLocator(1))
-    ax.yaxis.set_minor_locator(MultipleLocator(.25))
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
+ax.set_ylabel('Correlation with DLQ-1\n(Fisher $\it{z}$)')
+ax.set_ylim(ymin,ymax)
+ax.yaxis.set_major_locator(MultipleLocator(1))
+ax.yaxis.set_minor_locator(MultipleLocator(.25))
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
 
 
 ax.set_xticks(range(n_violins))

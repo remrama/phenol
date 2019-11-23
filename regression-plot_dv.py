@@ -21,7 +21,7 @@ infname = path.join(resdir,'ldim_adherence-effects.tsv')
 
 #########  load and manipulate data  #########
 
-df = pd.read_csv(infname,sep='\t',index_col='mildlength')
+df = pd.read_csv(infname,sep='\t',index_col='MILD_rehearsal_min')
 
 # run a cumulative sum across response options for plotting
 # cumsum_cols = df.columns.sort_values(ascending=False).tolist()
@@ -45,8 +45,8 @@ ax.set_xlim(xvals.min(),xvals.max())
 ax.set_ylim(0,1)
 ax.set_yticks([0,1])
 ax.set_xticks([0,5,10,15,20])
-ax.set_xlabel('MILD length (minutes)')
-ax.set_ylabel('Probability')
+ax.set_xlabel('MILD rehearsal length (minutes)')
+ax.set_ylabel('Probability of reaching lucidity level')
 
 ax.legend(handles=myplt.dlqpatches,loc='lower left',
           title='I was aware that I was dreaming.',

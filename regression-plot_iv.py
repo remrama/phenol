@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt; plt.ion()
 import seaborn as sea
 
 import pyplotparams as myplt
+from matplotlib.ticker import MultipleLocator
 
 
 with open('./config.json') as f:
@@ -19,26 +20,26 @@ with open('./config.json') as f:
     datadir = path.expanduser(p['data_directory'])
     resdir  = path.expanduser(p['results_directory'])
 
-infname = path.join(datadir,'data-clean.tsv')
+infname = path.join(datadir,'data.tsv')
 outfname = path.join(resdir,'ldim_adherence-scatter.png')
 
 df = pd.read_csv(infname,sep='\t')
 
-PREDICTORS = ['mildlength','n_rcs','wbtblength']
+PREDICTORS = ['n_reality_checks','MILD_rehearsal_min','MILD_awake_min']
 XLABELS = dict(
-    mildlength='MILD length (minutes)',
-    n_rcs='Number of reality checks',
-    wbtblength='WBTB length (minutes)',
+    MILD_rehearsal_min='MILD rehearsal length (minutes)',
+    n_reality_checks='Number of reality checks',
+    MILD_awake_min='MILD awake length (minutes)',
 )
-XTICKS_MAJOR = dict(
-    mildlength=pd.np.linspace(0,20,5),
-    n_rcs=[0,5,10],
-    wbtblength=pd.np.linspace(0,60,4),
+XTICKS_MAJOR = dict( # the spacing for MultipleLocator
+    MILD_rehearsal_min=5,
+    n_reality_checks=5,
+    MILD_awake_min=20,
 )
 XTICKS_MINOR = dict(
-    mildlength=pd.np.linspace(0,20,21),
-    n_rcs=pd.np.linspace(0,13,14),
-    wbtblength=pd.np.linspace(0,60,13),
+    MILD_rehearsal_min=1,
+    n_reality_checks=1,
+    MILD_awake_min=5,
 )
 
 # # only keep rows with recall
@@ -51,7 +52,7 @@ fig, axes = plt.subplots(1,len(PREDICTORS),figsize=(5*len(PREDICTORS),6))
 
 for i, (ax,col) in enumerate(zip(axes,PREDICTORS)):
 
-    sea.swarmplot(y='DLQ:1',x=col,data=df,
+    sea.swarmplot(y='DLQ_01',x=col,data=df,
         size=8,linewidth=1,#jitter=.2,
         palette=palette,
         ax=ax,orient='h')
@@ -59,8 +60,8 @@ for i, (ax,col) in enumerate(zip(axes,PREDICTORS)):
     # aesthetics
     ax.set_ylim(-.7,4.7)
     ax.set_yticks([0,1,2,3,4])
-    ax.set_xticks(XTICKS_MAJOR[col])
-    ax.set_xticks(XTICKS_MINOR[col],minor=True)
+    ax.xaxis.set_major_locator(MultipleLocator(XTICKS_MAJOR[col]))
+    ax.xaxis.set_minor_locator(MultipleLocator(XTICKS_MINOR[col]))
     ax.set_xlabel(XLABELS[col])
     ax.grid(True,axis='y',which='major',linestyle='--',
             linewidth=.25,color='k',alpha=1)

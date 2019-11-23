@@ -27,24 +27,26 @@ with open('./config.json') as f:
     DATADIR = path.expanduser(p['data_directory'])
     RESDIR  = path.expanduser(p['results_directory'])
     DLQ_STRINGS = p['DLQ_probes']
-# choose which DLQ probes get plotted
-DLQ_COLS = [ f'DLQ:{i}' for i in range(1,20) ]
-
+    FMT = p['float_formatting']
 
 # load data
-infname = path.join(DATADIR,'data-clean.tsv')
+infname = path.join(DATADIR,'data.tsv')
 df = pd.read_csv(infname,sep='\t')
 
+# choose which DLQ/MUSK probes get plotted
+probe_cols = [ col for col in df.columns if 
+    'DLQ' in col or 'MUSK' in col ]
+
 # get rid of dreams without recall
-df.dropna(inplace=True)
+df.dropna(subset=['dream_report'],axis=0,inplace=True)
 
 # extract data for plot, which is just desired DLQ probes
-plot_data_all = df[DLQ_COLS].values
-plot_data_lim = df.loc[df['DLQ:1']>1,DLQ_COLS].values
+plot_data_all = df[probe_cols].values
+plot_data_lim = df.loc[df['DLQ_01']>0,probe_cols].values
 
 # open figure
 width = 12
-height = .5*len(DLQ_COLS)
+height = .5*len(probe_cols)
 fig, axes = plt.subplots(1,2,figsize=(width,height))
 
 # loop over two datasets
@@ -58,7 +60,7 @@ for i, (ax,data) in enumerate(zip(axes,[plot_data_all,plot_data_lim])):
                meanprops={'color':'blue','linewidth':2,'linestyle':'dotted'})
 
     # aesthetics
-    ax.set_xticks([1,2,3,4,5])
+    ax.set_xticks(range(5))
     ax.grid(True,axis='x',which='major',linestyle='--',
             linewidth=.25,color='k',alpha=1)
     if i==0:
@@ -84,63 +86,39 @@ for ext in ['png','svg','eps']:
 plt.close()
 
 
-#######  pairwise DLQ correlations  #######
-
-# Really just interested in correlating DLQ:1
-# with all other DLQ probes. But run them all
-# because it's easy and maybe nice to have later.
-# Dont wanna do the whole resampling thing here
-# bc it's just not that important. Get a single
-# average value per subject.
-mean_df = df.groupby('subj')[DLQ_COLS].mean()
-pwise_stats = pairwise_corr(data=mean_df,columns=DLQ_COLS,
-    method='kendall',padjust='fdr_bh')
-
-# round values while also changing output format to print full values
-for col in pwise_stats.columns:
-    fmt = '%.02f' if 'p-' in col else '%.04f'
-    pwise_stats[col] = pwise_stats[col].map(lambda x: fmt % x)
-stats_fname = path.join(RESDIR,'dlq_correlations-stats.tsv')
-pwise_stats.to_csv(stats_fname,index=False,sep='\t')
-
 
 #######  descriptives dataframe  #######
 
 # first get quartiles for each DLQ question
-quartile_df = df[DLQ_COLS].quantile(q=[.25,.5,.75]).T
+quartile_df = df[probe_cols].quantile(q=[.25,.5,.75]).T
 quartile_df.columns = [ f'quantile_{x}' for x in quartile_df.columns ]
 
 ### median and CI??
 
 # now get contingency stuff
 # go from wide to long format
-df_melt = df.melt(value_vars=DLQ_COLS,
-                  id_vars=['subj'],
+df_melt = df.melt(value_vars=probe_cols,
+                  id_vars=['participant_id'],
                   var_name='probe',value_name='likert')
 
 # convert to categorical so 0s will show up in crosstab
-df_melt['likert'] = pd.Categorical(df_melt['likert'],categories=range(1,6),ordered=True)
+df_melt['likert'] = pd.Categorical(df_melt['likert'],categories=range(5),ordered=True)
 
 # make the contingency table
 cont_df = pd.crosstab(df_melt['probe'],df_melt['likert'],dropna=False)
 
 # drop extra layer for column index
-cont_df.columns = [ f'likert-{x}' for x in cont_df.columns ]
+cont_df.columns = [ f'freq_likert-{x}' for x in cont_df.columns ]
 
 
 ## combine both dataframes
 descr_df = pd.concat([cont_df,quartile_df],axis='columns',
     ignore_index=False,sort=True)
 
-# pad index values so they get ordered correctly
-def zero_padding(x):
-    return 'DLQ:{:02d}'.format(int(x.split(':')[1]))
-descr_df.index = descr_df.index.map(zero_padding)
-descr_df.sort_index(inplace=True)
 
 # export descriptives dataframe
 for col in descr_df.columns:
     if 'quantile' in col:
-        descr_df[col] = descr_df[col].map(lambda x: '%.02f' % x)
+        descr_df[col] = descr_df[col].map(lambda x: FMT % x)
 df_fname = path.join(RESDIR,'dlq_descriptives-data.tsv')
 descr_df.to_csv(df_fname,index=True,index_label='probe',sep='\t')

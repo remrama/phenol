@@ -18,12 +18,12 @@ import pyplotparams as myplt
 with open('./config.json') as f:
     p = load(f)
     resdir  = path.expanduser(p['results_directory'])
-infname = path.join(resdir,'dlq1-frequency.tsv')
+infname = path.join(resdir,'dlq01-frequencies.tsv')
 
 
 ########  load and manipulate data  #########
 
-df = pd.read_csv(infname,index_col='subj',sep='\t')
+df = pd.read_csv(infname,index_col='participant_id',sep='\t')
 
 # run a cumulative sum across response options for plotting
 cumsum_cols = pd.np.roll(df.columns.sort_values(ascending=False),-1).tolist()
@@ -43,12 +43,12 @@ for col, series in cumsum_df.iteritems():
     zorder = cumsum_cols[::-1].index(col)
     ax.barh(y=xvals,width=series.values,zorder=zorder,color=color,
         edgecolor='k',linewidth=0)
-    if col == 'DLQ1_resp-1':
+    if col == 'DLQ01_resp-0':
         ax.barh(y=xvals,width=series.values,zorder=10,color='none',
             edgecolor='k',linewidth=1)
 
 
-ax.set_xticks(range(0,cumsum_df.max().max()+1))
+ax.set_xticks(range(cumsum_df.max().max()+1))
 ax.set_yticks(range(min(xvals),max(xvals)+1))
 ax.set_yticklabels(cumsum_df.index.values)
 ax.set_xlabel('Number of nights')

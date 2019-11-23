@@ -15,14 +15,15 @@ suppressPackageStartupMessages(library(rjson))
 # load data
 datadir <- fromJSON(file='./config.json')$data_directory
 resdir  <- fromJSON(file='./config.json')$results_directory
-fname <- paste(datadir,"data-clean.tsv",sep="/")
+fname <- paste(datadir,"data.tsv",sep="/")
 data <- read.csv(fname,sep="\t") #na.strings='NaN')
-# only use those rows with DLQ completed
-data = data[!is.na(data$DLQ.1),]
+# only use those rows with dream recall
+data = data[!is.na(data$dream_report),]
+data = data[!is.na(data$DLQ_01),] # a few rows with recall but no DLQ
 
 # make sure factors are factors
-data$subj <- factor(data$subj)
-data$DLQ.1 <- factor(data$DLQ.1,ordered=TRUE)
+data$participant_id <- factor(data$participant_id)
+data$DLQ_01 <- factor(data$DLQ_01,ordered=TRUE)
 
 
 # summary(pac_1 <- polr(perceived_acad_success ~ fusion_t1_z, study1_t1, Hess = T)) 
@@ -38,8 +39,8 @@ data$DLQ.1 <- factor(data$DLQ.1,ordered=TRUE)
 # exp(confint(model.fit))
 
 # build/run ordinal regression
-model.fit <- clmm(DLQ.1 ~ (1|subj)
-    + n_rcs + mildlength + wbtblength,
+model.fit <- clmm(DLQ_01 ~ (1|participant_id)
+    + n_reality_checks + MILD_rehearsal_min + MILD_awake_min,
     data=data)
 print(summary(model.fit))
 # get odds ratios by taking exponent of the coefficients
@@ -48,9 +49,10 @@ outdf <- exp(cbind(OddsRatio=coef(model.fit),confint(model.fit)))
 # add pvalue from regression model
 outdf <- cbind(outdf,pval=summary(model.fit)$coefficients[,"Pr(>|z|)"])
 # drop the useless stuff and export
-predictors = c("n_rcs","mildlength","wbtblength")
+predictors = c("n_reality_checks","MILD_rehearsal_min","MILD_awake_min")
 outdf <- outdf[predictors,]
 # export ordinal regression model
+outdf = round(outdf,digits=3)
 outfname <- paste(resdir,"ldim_adherence-coefficients.tsv",sep="/")
 write.table(outdf,file=outfname,row.names=TRUE,col.names=NA,sep="\t")
 
@@ -58,14 +60,15 @@ write.table(outdf,file=outfname,row.names=TRUE,col.names=NA,sep="\t")
 #### export model predictions for plotting in python
 
 mildlength_vals <- 0:20
-effdata <- Effect(focal.predictors=c("mildlength"),mod=model.fit,
-                  xlevels=list(mildlength=mildlength_vals))
+effdata <- Effect(focal.predictors=c("MILD_rehearsal_min"),mod=model.fit,
+                  xlevels=list(MILD_rehearsal_min=mildlength_vals))
 
 outeffdata <- effdata["prob"]$prob
 # add col denoting mildlength used for model prediction
-outeffdata <- cbind(outeffdata,mildlength=mildlength_vals)
+outeffdata <- cbind(outeffdata,MILD_rehearsal_min=mildlength_vals)
 # rename them too
 colnames(outeffdata) <- gsub("X","DLQ",colnames(outeffdata))
 
+outeffdata = round(outeffdata,digits=3)
 efffname <- paste(resdir,"ldim_adherence-effects.tsv",sep="/")
 write.table(outeffdata,file=efffname,row.names=FALSE,col.names=TRUE,sep="\t")

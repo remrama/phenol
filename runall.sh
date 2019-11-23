@@ -1,9 +1,11 @@
 # Directory structure is pull from the configuration file (`config.json`),
 # so check that before running anything.
 
+set -e # so script exits if any commands/subscripts fail
+
 
 # convert original raw data file from excel to csv, and clean it up a bit
-python cleandata.py
+python clean_data.py
 
 # get descriptive statistics/plots for the whole DLQ/MUSK questionnaire
 python dlq_descriptives.py
