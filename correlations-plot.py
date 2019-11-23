@@ -39,8 +39,8 @@ statdf = pd.read_csv(stats_fname,sep='\t',index_col='probe')
 panas_pos_cols = [ f'PANAS_{x:02d}' for x in pos_probes ]
 panas_neg_cols = [ f'PANAS_{x:02d}' for x in neg_probes ]
 control_cols   = [ f'DLQ_{x:02d}' for x in control_probes ]
-datadf['PANAS_pos']     = datadf[panas_pos_cols].mean(axis=1)
-datadf['PANAS_neg']     = datadf[panas_neg_cols].mean(axis=1)
+datadf['PANAS_pos']     = datadf[panas_pos_cols].sum(axis=1)
+datadf['PANAS_neg']     = datadf[panas_neg_cols].sum(axis=1)
 datadf['dream_control'] = datadf[control_cols].mean(axis=1)
 
 
@@ -63,10 +63,16 @@ xlabel_dict = {
     'dream_control'      : 'Dream control',
     'sleep_quality'      : 'Subjective sleep quality'
 }
-# all variables have a minimum of 1, but the max is different
-low_xmax_vars = ['PANAS_pos','PANAS_neg','dream_control']
-xlims_dict = { var: 5 if var in low_xmax_vars else 10
-    for var in xlabel_dict.keys() }
+
+xlims_dict = {}
+for key in xlabel_dict.keys():
+    if 'CHAR' in key:
+        xlim = (0,9)
+    elif 'PANAS' in key:
+        xlim = (0,30)
+    elif key == 'dream_control':
+        xlim = (0,4)
+    xlims_dict[key] = xlim
 
 # set it up so everything will be ordered by correlation effect
 statdf.sort_values('fishz_mean',ascending=False,inplace=True)
@@ -85,7 +91,7 @@ fig, axes = plt.subplots(n_rows,n_cols,figsize=(width,height),
 
 for ax, var in zip(axes.flat,correlated_vars):
 
-    xmax = xlims_dict[var]
+    xmin, xmax = xlims_dict[var]
     xlabel = xlabel_dict[var]
     
     # scatterplot
@@ -96,14 +102,13 @@ for ax, var in zip(axes.flat,correlated_vars):
     ax.invert_yaxis()
     ax.set_yticks(range(0,5))
     ax.set_ylim(-.5,4.5)
-    # ax.set_xlim(.5,xmax+.5)
-    # ax.set_xticks(range(1,xmax+1))
-    xticklabels = [''] * xmax
-    # all scales start at 0 and end at xmax-1 (bc data is 1 higher than survey)
-    xticklabels[0] = 0
-    xticklabels[-1] = xmax-1
-    # ax.set_xticklabels(xticklabels)
-    # ax.xaxis.set_major_locator(MultipleLocator(xmax))
+    ax.xaxis.set_major_locator(MultipleLocator(xmax))
+    if xmax > 10:
+        ax.xaxis.set_minor_locator(MultipleLocator(5))
+        ax.set_xlim(xmin-2,xmax+2)
+    else:
+        ax.xaxis.set_minor_locator(MultipleLocator(1))
+        ax.set_xlim(xmin-.5,xmax+.5)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     if ax == axes.flat[0]:
@@ -117,7 +122,7 @@ for ax, var in zip(axes.flat,correlated_vars):
     ax.grid(True,axis='y',which='major',linestyle='--',linewidth=.25,color='k',alpha=1)
 
     slope, intercept = statdf.loc[var,['slope_mean','intercept_mean']]
-    x = pd.np.arange(1,xmax+1)
+    x = pd.np.arange(xmin,xmax+1)
     line = slope*x + intercept
     ax.plot(x,line,color='k',linewidth=1)
 
@@ -168,7 +173,7 @@ for x, var in enumerate(correlated_vars):
 
 ax.axhline(0,linestyle='--',linewidth=.25,color='k')
 
-ax.set_ylabel('Correlation with DLQ-1\n(Fisher $\it{z}$)')
+ax.set_ylabel('Correlation with DLQ-1\n($\tau \it{z}-score$)')
 ax.set_ylim(ymin,ymax)
 ax.yaxis.set_major_locator(MultipleLocator(1))
 ax.yaxis.set_minor_locator(MultipleLocator(.25))

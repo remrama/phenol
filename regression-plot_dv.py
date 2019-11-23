@@ -10,6 +10,7 @@ import matplotlib; matplotlib.use('Qt5Agg') # python3 bug
 import matplotlib.pyplot as plt; plt.ion()
 
 import pyplotparams as myplt
+from matplotlib.ticker import MultipleLocator
 
 
 with open('./config.json') as f:
@@ -44,7 +45,8 @@ for col, series in cumsum_df.iteritems():
 ax.set_xlim(xvals.min(),xvals.max())
 ax.set_ylim(0,1)
 ax.set_yticks([0,1])
-ax.set_xticks([0,5,10,15,20])
+ax.xaxis.set_major_locator(MultipleLocator(20))
+ax.xaxis.set_minor_locator(MultipleLocator(5))
 ax.set_xlabel('MILD rehearsal length (minutes)')
 ax.set_ylabel('Probability of reaching lucidity level')
 

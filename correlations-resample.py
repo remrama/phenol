@@ -59,8 +59,8 @@ cols2corr.append('dream_control')
 panas_pos_cols = [ f'PANAS_{x:02d}' for x in POS_PROBES ]
 panas_neg_cols = [ f'PANAS_{x:02d}' for x in NEG_PROBES ]
 control_cols   = [ f'DLQ_{x:02d}' for x in CONTROL_PROBES ]
-df['PANAS_pos']     = df[panas_pos_cols].mean(axis=1)
-df['PANAS_neg']     = df[panas_neg_cols].mean(axis=1)
+df['PANAS_pos']     = df[panas_pos_cols].sum(axis=1)
+df['PANAS_neg']     = df[panas_neg_cols].sum(axis=1)
 df['dream_control'] = df[control_cols].mean(axis=1)
 
 
