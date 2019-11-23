@@ -75,11 +75,6 @@ for i, (ax,col) in enumerate(zip(axes,PREDICTORS)):
         ax.set_ylabel('')
         ax.set_yticklabels([])
 
-    # ax.set_ylim(mildlength.min()-.1,mildlength.max()+.1)
-    if i == len(PREDICTORS)-1:
-        ax.legend(handles=myplt.dlqpatches,loc='upper right',
-                  title='I was aware that I was dreaming.',
-                  frameon=False,bbox_to_anchor=(1.18,1.18))
 
 plt.tight_layout()
 plt.savefig(outfname)
