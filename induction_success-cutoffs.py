@@ -105,8 +105,8 @@ for conda, condb in stats_df.index:
     colb = f'{col_keyb}_past_cutoff'
     freqa = df.loc[indxa,cola]
     freqb = df.loc[indxb,colb]
-    nobs_a = totals[col_keya]
-    nobs_b = totals[col_keyb]
+    nobs_a = totals[eva]
+    nobs_b = totals[evb]
     freqs = [freqa,freqb]
     n_obs = [nobs_a,nobs_b]
     z, p = proportions_ztest(freqs,n_obs)
