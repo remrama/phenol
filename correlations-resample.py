@@ -78,9 +78,13 @@ res_df = pd.DataFrame(columns=METRICS,index=index,dtype=float)
 # correlations, resampling a random night from
 # each participant every time
 for col in tqdm.tqdm(cols2corr,desc='resampling correlations'):
+    # if it's one of the CHAR columns, then the
+    # 0 option is "no recall" so take that out
+    if 'CHAR' in col:
+        subdf = df[ df[col] > 0]
     for i in tqdm.trange(N_RESAMPLES,desc=col):
         # sample one night from each subject, randomly
-        rsmpl_df = df.groupby('participant_id').apply(
+        rsmpl_df = subdf.groupby('participant_id').apply(
             lambda df: df.sample(1))[['DLQ_01',col]]
         # correlate col/var with DLQ1
         r = rsmpl_df.corr(method='kendall').values[0,1]
