@@ -81,7 +81,7 @@ for col in tqdm.tqdm(cols2corr,desc='resampling correlations'):
     # if it's one of the CHAR columns, then the
     # 0 option is "no recall" so take that out
     if 'CHAR' in col:
-        subdf = df[ df[col] > 0]
+        subdf = df[ df[col] > 0 ]
     else:
         subdf = df
     for i in tqdm.trange(N_RESAMPLES,desc=col):
