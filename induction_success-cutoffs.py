@@ -14,8 +14,8 @@ of those two things.
 from os import path
 from json import load
 import pandas as pd
+import itertools
 
-from itertools import combinations
 from statsmodels.stats.proportion import proportions_ztest
 
 import matplotlib; matplotlib.use('Qt5Agg') # python3 bug
@@ -59,6 +59,8 @@ df = pd.DataFrame(columns=columns,index=index)
 df['dreams_past_cutoff'] = cumsum_df[DLQ_COLS].sum(axis=0)
 df['subjs_past_cutoff']  = cumsum_df[DLQ_COLS].astype(bool).sum(axis=0)
 
+totals = dict(reports=n_reports,dreams=n_dreams,subjs=n_subjs)
+
 df['proportion_reports'] = df['dreams_past_cutoff'] / n_reports
 df['proportion_dreams'] = df['dreams_past_cutoff'] / n_dreams
 df['proportion_subjs'] = df['subjs_past_cutoff'] / n_subjs
@@ -70,48 +72,53 @@ for col in df.columns:
 
 #########  stats  #########
 
-n_combos = 3 * len(list(combinations(DLQ_COLS,2)))
+# build the combinations of evals and cutoffs for 2way tests
+EVALS = ['subjs','dreams','reports']
+CUTOFFS = [1,2,3,4] # nonzero DLQ1 likert responses
+cutoff_combos = itertools.combinations(CUTOFFS,2)
+eval_cutoff_combos = itertools.product(EVALS,cutoff_combos)
+eval_cutoff_combos = [ (x[0],x[1][0],x[1][1])
+                      for x in eval_cutoff_combos ]
+all_combos = [ (f'eval-{e}_resp-{a}',f'eval-{e}_resp-{b}')
+               for e, a, b in eval_cutoff_combos ]
+# add comparisons within each cutoff criterion
+# 3 comparisons within each
+eval_combos = list(itertools.combinations(EVALS,2))
+for c in CUTOFFS:
+    for a, b in eval_combos:
+        all_combos.append( (f'eval-{a}_resp-{c}',f'eval-{b}_resp-{c}') )
 
-dreams_past_cutoff = df['dreams_past_cutoff'].values
-n_observations = pd.np.repeat(n_dreams,dreams_past_cutoff.size)
+# run comparisons
+columns = ['z','p']
+index = pd.MultiIndex.from_tuples(all_combos,names=['label_a','label_b'])
+stats_df = pd.DataFrame(columns=columns,index=index)
 
-stats_df = pd.DataFrame(index=range(n_combos),
-    columns=['evaluation','cutoff_a','cutoff_b','zval','pval'])
-
-i = 0
-# compare for all subjs
-for cutoffA, cutoffB in combinations(DLQ_COLS,2):
-    a = df.loc[cutoffA,'subjs_past_cutoff']
-    b = df.loc[cutoffB,'subjs_past_cutoff']
-    z, p = proportions_ztest([a,b],[n_subjs,n_subjs])
-    stats_df.loc[i,'evaluation'] = 'subjs'
-    stats_df.loc[i,['cutoff_a','cutoff_b']] = [cutoffA,cutoffB]
-    stats_df.loc[i,['zval','pval']] = [z,p]
-    i += 1
-
-# compare for reports and nights
-# only thing different here is the n_observations
-cond_dict = dict(reports=n_reports,dreams=n_dreams)
-for label, n_obs in cond_dict.items():
-    for cutoffA, cutoffB in combinations(DLQ_COLS,2):
-        a = df.loc[cutoffA,'dreams_past_cutoff']
-        b = df.loc[cutoffB,'dreams_past_cutoff']
-        z, p = proportions_ztest([a,b],[n_obs,n_obs])
-        stats_df.loc[i,'evaluation'] = label
-        stats_df.loc[i,['cutoff_a','cutoff_b']] = [cutoffA,cutoffB]
-        stats_df.loc[i,['zval','pval']] = [z,p]
-        i += 1
-
-# round values while also changing output format to print full values
-stats_df['zval'] = stats_df['zval'].map(lambda x: FMT % x)
-stats_df['pval'] = stats_df['pval'].map(lambda x: FMT % x)
-
+for conda, condb in stats_df.index:
+    eva, ca = [ x.split('-')[1] for x in conda.split('_') ]
+    evb, cb = [ x.split('-')[1] for x in condb.split('_') ]
+    indxa = f'DLQ01_resp-{ca}'
+    indxb = f'DLQ01_resp-{cb}'
+    col_keya = 'dreams' if eva == 'reports' else eva
+    col_keyb = 'dreams' if evb == 'reports' else evb
+    cola = f'{col_keya}_past_cutoff'
+    colb = f'{col_keyb}_past_cutoff'
+    freqa = df.loc[indxa,cola]
+    freqb = df.loc[indxb,colb]
+    nobs_a = totals[col_keya]
+    nobs_b = totals[col_keyb]
+    freqs = [freqa,freqb]
+    n_obs = [nobs_a,nobs_b]
+    z, p = proportions_ztest(freqs,n_obs)
+    stats_df.loc[ (conda,condb), ['z','p'] ] = z, p
 
 # export data and results dataframes
-df_fname  = path.join(resdir,'induction_success_cutoffs-data.tsv')
+# round values while also changing output format to print full values
+for col in ['z','p']:
+    stats_df[col] = stats_df[col].map(lambda x: FMT % x)
+df_fname = path.join(resdir,'induction_success_cutoffs-data.tsv')
 stats_fname = path.join(resdir,'induction_success_cutoffs-stats.tsv')
 df.to_csv(df_fname,index=True,sep='\t')
-stats_df.to_csv(stats_fname,index=False,sep='\t')
+stats_df.to_csv(stats_fname,float_format=FMT,index=True,sep='\t')
 
 
 
