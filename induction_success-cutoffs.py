@@ -17,6 +17,7 @@ import pandas as pd
 import itertools
 
 from statsmodels.stats.proportion import proportions_ztest
+from statsmodels.stats.multitest import fdrcorrection
 
 import matplotlib; matplotlib.use('Qt5Agg') # python3 bug
 import matplotlib.pyplot as plt; plt.ion()
@@ -90,7 +91,7 @@ for c in CUTOFFS:
 
 # run comparisons
 columns = ['z','p']
-index = pd.MultiIndex.from_tuples(all_combos,names=['label_a','label_b'])
+index = pd.MultiIndex.from_tuples(all_combos,names=['proportion_a','proportion_b'])
 stats_df = pd.DataFrame(columns=columns,index=index)
 
 for conda, condb in stats_df.index:
@@ -111,9 +112,13 @@ for conda, condb in stats_df.index:
     z, p = proportions_ztest(freqs,n_obs)
     stats_df.loc[ (conda,condb), ['z','p'] ] = z, p
 
+pvals = stats_df['p']
+_, p_corr = fdrcorrection(pvals,method='indep',is_sorted=False)
+stats_df['p_corr'] = p_corr
+
 # export data and results dataframes
 # round values while also changing output format to print full values
-for col in ['z','p']:
+for col in ['z','p','p_corr']:
     stats_df[col] = stats_df[col].map(lambda x: FMT % x)
 df_fname = path.join(resdir,'induction_success_cutoffs-data.tsv')
 stats_fname = path.join(resdir,'induction_success_cutoffs-stats.tsv')
