@@ -76,8 +76,6 @@ for key in xlabel_dict.keys():
         xlim = (1,7)
     xlims_dict[key] = xlim
 
-# set it up so everything will be ordered by correlation effect
-statdf.sort_values('fishz_mean',ascending=False,inplace=True)
 
 # extract all the columns/variables that we correlated
 correlated_vars = statdf.index

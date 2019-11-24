@@ -71,6 +71,9 @@ stats_df['pval_corrected'] = corrp
 
 ########  export dataframes  ########
 
+# set it up so everything will be ordered by correlation effect
+stats_df.sort_values('pval',ascending=True,inplace=True)
+
 # round values while also changing output format to print full values
 for df in [stats_df,res_df]:
     for col in df.columns:
