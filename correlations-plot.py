@@ -67,7 +67,7 @@ xlabel_dict = {
 xlims_dict = {}
 for key in xlabel_dict.keys():
     if 'CHAR' in key:
-        xlim = (0,9)
+        xlim = (1,9)
     elif 'PANAS' in key:
         xlim = (0,30)
     elif key == 'dream_control':
@@ -95,14 +95,18 @@ for ax, var in zip(axes.flat,correlated_vars):
     xlabel = xlabel_dict[var]
     
     # scatterplot
-    sea.swarmplot(y='DLQ_01',x=var,data=datadf,
+    if 'CHAR' in var:
+        plotdf = datadf[ datadf[var] > 0 ]
+    else:
+        plotdf = datadf
+    sea.swarmplot(y='DLQ_01',x=var,data=plotdf,
         size=6,linewidth=1,#jitter=.2,
         palette=palette,orient='h',ax=ax)
 
     ax.invert_yaxis()
     ax.set_yticks(range(0,5))
     ax.set_ylim(-.5,4.5)
-    ax.xaxis.set_major_locator(MultipleLocator(xmax))
+    ax.set_xticks([xmin,xmax])
     if xmax > 10:
         ax.xaxis.set_minor_locator(MultipleLocator(5))
         ax.set_xlim(xmin-2,xmax+2)
