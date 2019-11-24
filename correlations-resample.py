@@ -53,6 +53,7 @@ df.dropna(subset=['dream_report'],axis=0,inplace=True)
 cols2corr = [ col for col in df.columns if 'CHAR' in col ]
 cols2corr.append('PANAS_pos')
 cols2corr.append('PANAS_neg')
+cols2corr.append('sleep_quality')
 cols2corr.append('dream_control')
 
 # generate columns that require manipulations of the raw data

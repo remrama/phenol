@@ -54,10 +54,10 @@ xlabel_dict = {
     'CHAR_bizarreness'   : 'Dream bizarreness',
     'CHAR_neg_emo'       : 'Dream negative emotion',
     'CHAR_neg_body'      : 'Dream negative body',
-    'CHAR_neg_mood'      : 'Waking negative mood',
+    'CHAR_neg_mood'      : 'Awakening negative mood',
     'CHAR_pos_emo'       : 'Dream positive emotion',
     'CHAR_pos_body'      : 'Dream positive body',
-    'CHAR_pos_mood'      : 'Waking positive mood',
+    'CHAR_pos_mood'      : 'Awakening positive mood',
     'PANAS_pos'          : 'Positive morning affect',
     'PANAS_neg'          : 'Negative morning affect',
     'dream_control'      : 'Dream control',
@@ -72,6 +72,8 @@ for key in xlabel_dict.keys():
         xlim = (0,30)
     elif key == 'dream_control':
         xlim = (0,4)
+    elif key == 'sleep_quality':
+        xlim = (1,7)
     xlims_dict[key] = xlim
 
 # set it up so everything will be ordered by correlation effect
