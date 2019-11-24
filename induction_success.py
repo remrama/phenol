@@ -12,6 +12,7 @@ import matplotlib; matplotlib.use('Qt5Agg') # python3 bug
 import matplotlib.pyplot as plt; plt.ion()
 
 import pyplotparams as myplt
+from matplotlib.ticker import MultipleLocator
 
 ########  load and manipulate data  ########
 with open('./config.json') as f:
@@ -92,7 +93,8 @@ ax.bar(xvals,freqs,color=colors,edgecolor='k',width=1,linewidth=.5)
 
 ax.set_xlim(-.75,4.75)
 ax.set_ylim(0,max(freqs)+1)
-# ax.set_yticks(range(0,max(yvals)))
+ax.yaxis.set_major_locator(MultipleLocator(20))
+ax.yaxis.set_minor_locator(MultipleLocator(5))
 ax.set_xticks(range(5))
 ax.set_xticklabels(list(myplt.DLQ_STRINGS.values()),rotation=25,ha='right')
 ax.set_ylabel('Number of nights')
@@ -124,7 +126,9 @@ ax.bar(xvals,yvals,color=colors,edgecolor='k',width=1,linewidth=.5)
 
 ax.set_xlim(.25,2.75)
 ax.set_ylim(0,max(yvals)+1)
-# ax.set_yticks(range(0,max(yvals)))
+ax.yaxis.set_major_locator(MultipleLocator(20))
+ax.yaxis.set_minor_locator(MultipleLocator(5))
+ax.set_yticklabels([])
 ax.set_xticks([1,2])
 first_ticklabel = list(myplt.DLQ_STRINGS.values())[0]
 second_ticklabel = '>= ' + list(myplt.DLQ_STRINGS.values())[1]
