@@ -170,12 +170,14 @@ for x, var in enumerate(correlated_vars):
     p, pcorr = statdf.loc[var,['pval','pval_corrected']]
     if p < .05:
         fillstyle = 'full' if pcorr < .05 else 'none'
-        ax.plot(x,ymark,marker='*',color='k',
-            fillstyle=fillstyle,markersize=7)
+        ax.plot(x,ymark,marker='*',fillstyle=fillstyle,color='k',markersize=7)
+    elif p < .1:
+        ax.plot(x,ymark,marker='^',fillstyle='none',color='k',markersize=7)
+
 
 ax.axhline(0,linestyle='--',linewidth=.25,color='k')
 
-ax.set_ylabel('Correlation with DLQ-1\n($\tau \it{z}-score$)')
+ax.set_ylabel('Correlation with DLQ-1\n($\\tau$ $\it{z}$-score)')
 ax.set_ylim(ymin,ymax)
 ax.yaxis.set_major_locator(MultipleLocator(1))
 ax.yaxis.set_minor_locator(MultipleLocator(.25))
