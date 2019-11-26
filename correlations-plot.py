@@ -3,7 +3,7 @@ Plot all the correlations with DLQ1.
 
 Outputs 2 plots
     - swarmplots with regression line
-    - distribution of fisherz r values
+    - distribution of fisherz tau values
 """
 from os import path
 from json import load
@@ -81,8 +81,8 @@ for key in xlabel_dict.keys():
 correlated_vars = statdf.index
 # one subplot/axis for each variables
 n_axes = len(correlated_vars)
-n_rows = 2
-n_cols = int(pd.np.ceil(11/2))
+n_rows = 3
+n_cols = int(pd.np.ceil(n_axes/n_rows))
 height = 5 * n_rows
 width = 5 * n_cols
 
@@ -107,6 +107,7 @@ for ax, var in zip(axes.flat,correlated_vars):
     ax.set_yticks(range(0,5))
     ax.set_ylim(-.5,4.5)
     ax.set_xticks([xmin,xmax])
+    ax.set_xlabel(xlabel)
     if xmax > 10:
         ax.xaxis.set_minor_locator(MultipleLocator(5))
         ax.set_xlim(xmin-2,xmax+2)
@@ -115,15 +116,17 @@ for ax, var in zip(axes.flat,correlated_vars):
         ax.set_xlim(xmin-.5,xmax+.5)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
+    ax.grid(True,axis='y',which='major',linestyle='--',linewidth=.25,color='k',alpha=1)
     if ax == axes.flat[0]:
         ax.set_ylabel('I was aware that I was dreaming')
         ax.set_yticklabels(list(myplt.DLQ_STRINGS.values()),rotation=25)
     else:
         ax.set_ylabel('')
         ax.set_yticklabels([])
-    ax.set_xlabel(xlabel)
+        for tic in ax.yaxis.get_major_ticks():
+            tic.tick1On = tic.tick2On = False
 
-    ax.grid(True,axis='y',which='major',linestyle='--',linewidth=.25,color='k',alpha=1)
+
 
     slope, intercept = statdf.loc[var,['slope_mean','intercept_mean']]
     x = pd.np.arange(xmin,xmax+1)
