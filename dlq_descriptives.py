@@ -1,19 +1,16 @@
 """
-Draw boxplots for each DLQ question.
-Across all subjects.
+Figure A1
 
-For each DLQ probe, plot a box including
-data from all attempts that include recall,
-and also a box including only responses
-that include non-zero awareness.
+Draw boxplots for all DLQ probes
+and save out the descriptives dataframe.
 
-Also save out descriptives dataframe.
+Exports one figure with two axes:
+    - left side includes all data (with recall)
+    - right side includes only data from nonzero lucidity
 """
 from os import path
 from json import load
 import pandas as pd
-
-from pingouin import pairwise_corr
 
 import matplotlib; matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt; plt.ion()
@@ -29,20 +26,28 @@ with open('./config.json') as f:
     DLQ_STRINGS = p['DLQ_probes']
     FMT = p['float_formatting']
 
-# load data
+
+########### export filenames
+plot_fname = path.join(RESDIR,'dlq_descriptives-plot.svg')
+df_fname   = path.join(RESDIR,'dlq_descriptives-data.tsv')
+
+
+###########  load data  ###########
+
 infname = path.join(DATADIR,'data.tsv')
 df = pd.read_csv(infname,sep='\t')
-
-# choose which DLQ/MUSK probes get plotted
-probe_cols = [ col for col in df.columns if 
-    'DLQ' in col or 'MUSK' in col ]
 
 # get rid of dreams without recall
 df.dropna(subset=['dream_report'],axis=0,inplace=True)
 
-# extract data for plot, which is just desired DLQ probes
+# extract data for plot, which is only the DLQ/MUSK columns
+probe_cols = [ col for col in df.columns if 'DLQ' in col or 'MUSK' in col ]
 plot_data_all = df[probe_cols].values
 plot_data_lim = df.loc[df['DLQ_01']>0,probe_cols].values
+
+
+
+###########  draw plot  ###########
 
 # open figure
 width = 12
@@ -79,7 +84,6 @@ for i, (ax,data) in enumerate(zip(axes,[plot_data_all,plot_data_lim])):
 
 plt.tight_layout()
 
-plot_fname = path.join(RESDIR,'dlq_descriptives-plot.svg')
 plt.savefig(plot_fname)
 plt.close()
 
@@ -118,5 +122,4 @@ descr_df = pd.concat([cont_df,quartile_df],axis='columns',
 for col in descr_df.columns:
     if 'quantile' in col:
         descr_df[col] = descr_df[col].map(lambda x: FMT % x)
-df_fname = path.join(RESDIR,'dlq_descriptives-data.tsv')
 descr_df.to_csv(df_fname,index=True,index_label='probe',sep='\t')

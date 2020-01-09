@@ -1,6 +1,13 @@
 """
-Plot a single histogram counting responses
-per lucidity level across all participants.
+Figure 1A
+
+Plot a histogram counting responses per
+lucidity level across all participants,
+and also one that compares just zero
+vs nonzero lucidity.
+
+Also export stats dataframe that runs chisquare
+across all DLQs (main plot) and binomial test on subplot.
 """
 
 from os import path
