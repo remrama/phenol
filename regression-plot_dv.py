@@ -55,6 +55,5 @@ ax.legend(handles=myplt.dlqpatches,loc='lower left',
           frameon=False)
 
 plt.tight_layout()
-for ext in ['png','svg','eps']:
-    plt.savefig(infname.replace('tsv',ext))
+plt.savefig(infname.replace('tsv','svg'))
 plt.close()

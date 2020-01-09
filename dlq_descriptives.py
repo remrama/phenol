@@ -79,10 +79,8 @@ for i, (ax,data) in enumerate(zip(axes,[plot_data_all,plot_data_lim])):
 
 plt.tight_layout()
 
-
-for ext in ['png','svg','eps']:
-    plot_fname = path.join(RESDIR,f'dlq_descriptives-plot.{ext}')
-    plt.savefig(plot_fname)
+plot_fname = path.join(RESDIR,'dlq_descriptives-plot.svg')
+plt.savefig(plot_fname)
 plt.close()
 
 

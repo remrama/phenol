@@ -21,7 +21,7 @@ with open('./config.json') as f:
     resdir  = path.expanduser(p['results_directory'])
 
 infname = path.join(datadir,'data.tsv')
-outfname = path.join(resdir,'ldim_adherence-scatter.png')
+outfname = path.join(resdir,'ldim_adherence-scatter.svg')
 
 df = pd.read_csv(infname,sep='\t')
 
@@ -78,8 +78,6 @@ for i, (ax,col) in enumerate(zip(axes,PREDICTORS)):
 
 plt.tight_layout()
 plt.savefig(outfname)
-plt.savefig(outfname.replace('png','svg'))
-plt.savefig(outfname.replace('png','eps'))
 plt.close()
 
 

@@ -107,10 +107,8 @@ ax.legend(handles=myplt.dlqpatches,loc='upper right',
           frameon=False)
 
 plt.tight_layout()
-
-for ext in ['png','svg','eps']:
-    plot_fname = path.join(resdir,f'induction_success-plot.{ext}')
-    plt.savefig(plot_fname)
+plot_fname = path.join(resdir,'induction_success-plot.svg')
+plt.savefig(plot_fname)
 plt.close()
 
 
@@ -140,9 +138,7 @@ ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
 
 plt.tight_layout()
-
-for ext in ['png','svg','eps']:
-    plot_fname = path.join(resdir,f'induction_success-plot_nonzero.{ext}')
-    plt.savefig(plot_fname)
+plot_fname = path.join(resdir,'induction_success-plot_nonzero.svg')
+plt.savefig(plot_fname)
 plt.close()
 

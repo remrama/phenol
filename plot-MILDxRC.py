@@ -14,7 +14,7 @@ datadir = path.expanduser('~/IDrive-Sync/proj/phenol/data')
 resdir  = path.expanduser('~/IDrive-Sync/proj/phenol/results')
 
 infname = path.join(datadir,'data-clean.tsv')
-outfname = path.join(resdir,'results-MILDxRC.png')
+outfname = path.join(resdir,'results-MILDxRC.svg')
 
 df = pd.read_csv(infname,sep='\t')
 
@@ -70,6 +70,4 @@ cbar.set_label('Number of reality checks during day')
 
 plt.tight_layout()
 plt.savefig(outfname)
-plt.savefig(outfname.replace('png','svg'))
-plt.savefig(outfname.replace('png','eps'))
 plt.close()

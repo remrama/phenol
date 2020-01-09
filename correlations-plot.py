@@ -142,9 +142,8 @@ if n_axes % 2 != 0:
     ax.set_xticks([]); ax.set_yticks([])
 
 plt.tight_layout()
-for ext in ['png','svg','eps']:
-    plot_fname = path.join(resdir,f'correlations-plot.{ext}')
-    plt.savefig(plot_fname)
+plot_fname = path.join(resdir,'correlations-plot.svg')
+plt.savefig(plot_fname)
 plt.close()
 
 
@@ -195,7 +194,6 @@ ax.set_xticklabels(xticklabels,rotation=33,ha='right')
 ax.set_xlim(-.5,n_violins-.5)
 
 plt.tight_layout()
-for ext in ['png','svg','eps']:
-    plot_fname = path.join(resdir,f'correlations-plot_rs.{ext}')
-    plt.savefig(plot_fname)
+plot_fname = path.join(resdir,'correlations-plot_rs.svg')
+plt.savefig(plot_fname)
 plt.close()

@@ -63,9 +63,8 @@ ax.legend(handles=legend_patches,loc='upper right',
           frameon=True,bbox_to_anchor=(1.15,1.15))
 
 plt.tight_layout()
-for ext in ['png','svg','eps']:
-    plot_fname = path.join(resdir,f'induction_success_indiv-plot.{ext}')
-    plt.savefig(plot_fname)
+plot_fname = path.join(resdir,'induction_success_indiv-plot.svg')
+plt.savefig(plot_fname)
 plt.close()
 
 

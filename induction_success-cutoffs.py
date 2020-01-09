@@ -179,7 +179,6 @@ ax.legend(handles=legend_patches,loc='upper right',
 
 plt.tight_layout()
 
-for ext in ['png','svg','eps']:
-    plot_fname = path.join(resdir,f'induction_success_cutoffs-plot.{ext}')
-    plt.savefig(plot_fname)
+plot_fname = path.join(resdir,'induction_success_cutoffs-plot.svg')
+plt.savefig(plot_fname)
 plt.close()
