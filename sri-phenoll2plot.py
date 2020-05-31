@@ -57,7 +57,6 @@ bizhi = [7,7,7,8,10,7,9,6,5,1,5,10]
 
 yvals, yerr = zip(*[ ( np.mean(vals), sem(vals) ) 
                     for vals in [poslo,poshi,neglo,neghi] ])
-
 xvals = [0,1,3,4]
 COLORS = dict(lo='gainsboro',hi='cornflowerblue')
 color_seq = [ COLORS[c] for c in ['lo','hi','lo','hi'] ]
@@ -70,7 +69,7 @@ LEFT_PAD = .02
 
 BARWIDTH = .7
 
-fig, ax = plt.subplots(figsize=(7,5))
+fig, (ax,ax2) = plt.subplots(1,2,figsize=(10,5),gridspec_kw={'width_ratios':[3.5,1]})
 
 ax.bar(xvals,yvals,yerr=yerr,color=color_seq,width=BARWIDTH,
        edgecolor='k',linewidth=2,
@@ -96,7 +95,7 @@ for y1, y2, y3, y4 in zip(poslo,poshi,neglo,neghi):
                linewidth=LINEWIDTH,edgecolor='k',zorder=3)
 
 ax.set_ylim(0,50)
-ax.set_xlim(-1,5)
+ax.set_xlim(xvals[0]-1,xvals[-1]+1)
 # ax.xaxis.set_major_locator(plt.NullLocator())
 ax.set_xticks([ np.mean(xvals[:2]), np.mean(xvals[2:]) ])
 ax.set_xticklabels([ 'Positive mood', 'Negative mood' ],fontsize=16)
@@ -141,6 +140,48 @@ ax.text(1,.93,'Mornings after high lucidity',
 
 
 
+##### right axis
+
+ax2.spines['left'].set_visible(False)
+ax2.spines['right'].set_visible(True)
+ax2.yaxis.tick_right()
+
+yvals, yerr = zip(*[ ( np.mean(vals), sem(vals) ) 
+                    for vals in [slpquallo,slpqualhi] ])
+
+ax2.bar(xvals[:2],yvals,yerr=yerr,color=color_seq[:2],width=BARWIDTH,
+        edgecolor='k',linewidth=2,
+        error_kw={'ecolor'     : 'k',
+                 'elinewidth' : 2,
+                 'capsize'    : 2,
+                 'capthick'   : 2},
+        zorder=1)
+
+for y1, y2 in zip(slpquallo,slpqualhi):
+    ax2.plot(points_xvals[:2],[y1,y2],'-',
+             color='k',alpha=1,linewidth=LINEWIDTH,zorder=2)
+    ax2.scatter(points_xvals[:2],[y1,y2],s=25,c=color_seq[:2],alpha=1,
+                linewidth=LINEWIDTH,edgecolor='k',zorder=3)
+
+ax2.set_xlim(-.8,1.8)
+# ax2.xaxis.set_major_locator(plt.NullLocator())
+ax2.set_xticks([ np.mean(xvals[:2]) ])
+ax2.set_xticklabels([ 'Sleep quality' ],fontsize=16)
+ax2.xaxis.set_ticks_position('none')
+
+ax2.set_ylim(0,10)
+ax2.yaxis.set(major_locator=mticker.MultipleLocator(10),
+              minor_locator=mticker.MultipleLocator(2))
+ax2.set_ylabel("Subjective sleep quality" + #r"$\bf{Waking\ mood\ the\ next\ day}$"
+               "\nbetter $\leftarrow$                                     $\\rightarrow$ worse",
+               labelpad=30,
+               fontsize=14,
+               rotation=-90)
+ax2.yaxis.set_label_position("right")
+
+ax2.text(np.mean(xvals[:2]),8,'n.s.',fontsize=12,va='bottom',ha='center',weight='bold')
+ax2.hlines(y=7.7,xmin=xvals[0],xmax=xvals[1],linewidth=2,color='k',capstyle='round')
+
 # ax.text(0+LEFT_PAD,1.,'Morning after dreams with',
 #         color='white',fontsize=FONT_SIZE,
 #         va='top',ha='left',transform=ax.transAxes,
@@ -157,7 +198,7 @@ ax.text(1,.93,'Mornings after high lucidity',
 #         path_effects=[mpatheffects.withStroke(linewidth=STROKE_WIDTH,foreground='k')])
 
 
-plt.tight_layout()
+plt.tight_layout(w_pad=3)
 plt.savefig(EXPORT_FNAME)
 plt.close()
 
