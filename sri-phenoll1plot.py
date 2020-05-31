@@ -25,7 +25,7 @@ rcParams['font.sans-serif'] = 'Arial'
 rcParams['axes.spines.top'] = False
 rcParams['axes.spines.right'] = False
 
-EXPORT_FNAME = './phenoll1-TEST.svg'
+EXPORT_FNAME = '../results/sri-phenoll1_plot.png'
 
 # load parameters from configuration file
 with open('./config.json','r') as f:
