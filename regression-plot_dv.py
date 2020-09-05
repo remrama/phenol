@@ -15,14 +15,14 @@ from matplotlib.ticker import MultipleLocator
 
 with open('./config.json') as f:
     p = load(f)
-    resdir  = path.expanduser(p['results_directory'])
+    DERIV_DIR = path.expanduser(p['derivatives_directory'])
 
-infname = path.join(resdir,'ldim_adherence-effects.tsv')
+infname = path.join(DERIV_DIR,'adherence-stats.csv')
 
 
 #########  load and manipulate data  #########
 
-df = pd.read_csv(infname,sep='\t',index_col='MILD_rehearsal_min')
+df = pd.read_csv(infname,index_col='MILD_rehearsal_min')
 
 # run a cumulative sum across response options for plotting
 # cumsum_cols = df.columns.sort_values(ascending=False).tolist()
@@ -55,5 +55,5 @@ ax.legend(handles=myplt.dlqpatches,loc='lower left',
           frameon=False)
 
 plt.tight_layout()
-plt.savefig(infname.replace('tsv','svg'))
+plt.savefig(infname.replace('csv','png'))
 plt.close()

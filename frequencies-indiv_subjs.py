@@ -17,20 +17,20 @@ import pyplotparams as myplt
 # load parameters from configuration file
 with open('./config.json') as f:
     p = load(f)
-    resdir  = path.expanduser(p['results_directory'])
-infname = path.join(resdir,'dlq01-frequencies.tsv')
+    DERIV_DIR = path.expanduser(p['derivatives_directory'])
+infname = path.join(DERIV_DIR,'ld_freqs.csv')
 
 
 ########  load and manipulate data  #########
 
-df = pd.read_csv(infname,index_col='participant_id',sep='\t')
+df = pd.read_csv(infname,index_col='participant_id')
 
 # run a cumulative sum across response options for plotting
 cumsum_cols = pd.np.roll(df.columns.sort_values(ascending=False),-1).tolist()
 cumsum_df = df[cumsum_cols].cumsum(axis=1)
 
-df_fname = path.join(resdir,'induction_success_indiv-data.tsv')
-cumsum_df.to_csv(df_fname,index=True,sep='\t')
+df_fname = path.join(DERIV_DIR,'ld_freqs-subjs.csv')
+cumsum_df.to_csv(df_fname,index=True)
 
 
 #########  draw the plot  #########
@@ -63,7 +63,7 @@ ax.legend(handles=legend_patches,loc='upper right',
           frameon=True,bbox_to_anchor=(1.15,1.15))
 
 plt.tight_layout()
-plot_fname = path.join(resdir,'induction_success_indiv-plot.svg')
+plot_fname = path.join(DERIV_DIR,'ld_freqs-subjs.png')
 plt.savefig(plot_fname)
 plt.close()
 

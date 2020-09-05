@@ -24,10 +24,10 @@ from matplotlib.ticker import MultipleLocator
 ########  load and manipulate data  ########
 with open('./config.json') as f:
     p = load(f)
-    resdir  = path.expanduser(p['results_directory'])
+    DERIV_DIR  = path.expanduser(p['derivatives_directory'])
     FMT = p['float_formatting']
-infname = path.join(resdir,'dlq01-frequencies.tsv')
-df = pd.read_csv(infname,sep='\t')
+infname = path.join(DERIV_DIR,'ld_freqs.csv')
+df = pd.read_csv(infname)
 
 DLQ_COLS = [ f'DLQ01_resp-{i}' for i in range(5) ]
 freqs = df[DLQ_COLS].sum(axis=0).values
@@ -65,8 +65,8 @@ stats_df.loc['zeroVSnonzero_DLQ01',['test','chisq','pval']] = ['binomial',pd.np.
 # export stats dataframe
 stats_df['chisq'] = stats_df['chisq'].map(lambda x: FMT % x)
 stats_df['pval']  = stats_df['pval'].map(lambda x: FMT % x)
-stats_fname = path.join(resdir,'induction_success-stats.tsv')
-stats_df.to_csv(stats_fname,index=True,sep='\t')
+stats_fname = path.join(DERIV_DIR,'ld_freqs-stats.csv')
+stats_df.to_csv(stats_fname,index=True)
 
 # all_markers = list(matplotlib.markers.MarkerStyle.filled_markers)
 # subjs = df['subj'].tolist()
@@ -114,7 +114,7 @@ ax.legend(handles=myplt.dlqpatches,loc='upper right',
           frameon=False)
 
 plt.tight_layout()
-plot_fname = path.join(resdir,'induction_success-plot.svg')
+plot_fname = path.join(DERIV_DIR,'ld_freqs-plot.png')
 plt.savefig(plot_fname)
 plt.close()
 
@@ -145,7 +145,7 @@ ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
 
 plt.tight_layout()
-plot_fname = path.join(resdir,'induction_success-plot_nonzero.svg')
+plot_fname = path.join(DERIV_DIR,'ld_freqs-plot_nonzero.png')
 plt.savefig(plot_fname)
 plt.close()
 

@@ -18,12 +18,12 @@ from matplotlib.ticker import MultipleLocator
 with open('./config.json') as f:
     p = load(f)
     datadir = path.expanduser(p['data_directory'])
-    resdir  = path.expanduser(p['results_directory'])
+    derivdir = path.expanduser(p['derivatives_directory'])
 
-infname = path.join(datadir,'data.tsv')
-outfname = path.join(resdir,'ldim_adherence-scatter.svg')
+infname = path.join(datadir,'data.csv')
+outfname = path.join(derivdir,'adherence.png')
 
-df = pd.read_csv(infname,sep='\t')
+df = pd.read_csv(infname)
 
 PREDICTORS = ['n_reality_checks','MILD_rehearsal_min','MILD_awake_min']
 XLABELS = dict(

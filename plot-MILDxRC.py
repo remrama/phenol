@@ -1,6 +1,9 @@
 """
 Try to visualize relationship between
 MILD, reality checks, and lucidity level.
+
+This is just an exploratory plot, that wasn't
+included in the paper in any way.
 """
 from os import path
 import pandas as pd

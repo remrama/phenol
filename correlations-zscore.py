@@ -6,7 +6,7 @@ zscored R values that are above 0.
 Export dataframe holding the final stats
 and correlation parameters.
 
-Also resaves out the resampling file, now with
+Also save out another resampling file, now with
 just an additional column for the fisher zscores.
 """
 from os import path
@@ -20,7 +20,7 @@ from statsmodels.stats.multitest import fdrcorrection
 # load results directory from configuration file
 with open('./config.json') as f:
     p = load(f)
-    RES_DIR  = path.expanduser(p['results_directory'])
+    DERIV_DIR = path.expanduser(p['derivatives_directory'])
     FMT = p['float_formatting']
     N_RESAMPLES = p['n_correlation_resamples']
 # choose params to make 95% confidence intervals
@@ -30,8 +30,8 @@ CI_HI = .975
 
 #######  load and manipulate data  #######
 
-infname = path.join(RES_DIR,'correlations-data.tsv')
-res_df = pd.read_csv(infname,sep='\t',index_col=['probe','resample'])
+infname = path.join(DERIV_DIR,'correlates.csv')
+res_df = pd.read_csv(infname,index_col=['probe','resample'])
 
 
 #######  derive pvalues  #######
@@ -79,7 +79,8 @@ for df in [stats_df,res_df]:
     for col in df.columns:
         df[col] = df[col].map(lambda x: FMT % x)
 
-stats_fname = path.join(RES_DIR,'correlations-stats.tsv')
-stats_df.to_csv(stats_fname,index=True,sep='\t')
+stats_fname = path.join(DERIV_DIR,'correlates-stats.csv')
+stats_df.to_csv(stats_fname,index=True)
 
-res_df.to_csv(infname,index=True,sep='\t')
+z_fname = path.join(DERIV_DIR,'correlates_withz.csv')
+res_df.to_csv(z_fname,index=True)

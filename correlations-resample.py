@@ -33,7 +33,7 @@ pd.np.random.seed(72) # for reproducibility
 with open('./config.json') as f:
     p = load(f)
     DATA_DIR = path.expanduser(p['data_directory'])
-    RES_DIR  = path.expanduser(p['results_directory'])
+    DERIV_DIR = path.expanduser(p['derivatives_directory'])
     POS_PROBES = p['PANAS_positive_probes']
     NEG_PROBES = p['PANAS_negative_probes']
     CONTROL_PROBES = p['DLQ_control_probes']
@@ -43,8 +43,8 @@ with open('./config.json') as f:
 
 #######  load and manipulate data  #######
 
-infname = path.join(DATA_DIR,'data.tsv')
-df = pd.read_csv(infname,sep='\t')
+infname = path.join(DATA_DIR,'data.csv')
+df = pd.read_csv(infname)
 
 # drop all nights without recall
 df.dropna(subset=['dream_report'],axis=0,inplace=True)
@@ -84,7 +84,7 @@ for col in tqdm.tqdm(cols2corr,desc='resampling correlations'):
         subdf = df[ df[col] > 0 ]
     else:
         subdf = df
-    for i in tqdm.trange(N_RESAMPLES,desc=col):
+    for i in tqdm.trange(N_RESAMPLES,desc=col,leave=False):
         # sample one night from each subject, randomly
         rsmpl_df = subdf.groupby('participant_id').apply(
             lambda df: df.sample(1))[['DLQ_01',col]]
@@ -103,7 +103,7 @@ for col in tqdm.tqdm(cols2corr,desc='resampling correlations'):
 # round values while also changing output format to print full values
 for col in res_df.columns:
     res_df[col] = res_df[col].map(lambda x: FMT % x)
-res_fname = path.join(RES_DIR,'correlations-data.tsv')
-res_df.to_csv(res_fname,index=True,sep='\t')
+res_fname = path.join(DERIV_DIR,'correlates.csv')
+res_df.to_csv(res_fname,index=True)
 
 print('\n') # clear last terminal line

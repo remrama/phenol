@@ -14,11 +14,11 @@ suppressPackageStartupMessages(library(rjson))
 
 # load data
 datadir <- fromJSON(file='./config.json')$data_directory
-resdir  <- fromJSON(file='./config.json')$results_directory
-fname <- paste(datadir,"data.tsv",sep="/")
-data <- read.csv(fname,sep="\t") #na.strings='NaN')
-# only use those rows with dream recall
-data = data[!is.na(data$dream_report),]
+derivdir <- fromJSON(file='./config.json')$derivatives_directory
+fname <- paste(datadir,"data.csv",sep="/")
+data <- read.csv(fname,na.strings="NA")
+# # only use those rows with dream recall
+# data = data[!is.na(data$dream_report),]
 data = data[!is.na(data$DLQ_01),] # a few rows with recall but no DLQ
 
 # make sure factors are factors
@@ -53,8 +53,8 @@ predictors = c("n_reality_checks","MILD_rehearsal_min","MILD_awake_min")
 outdf <- outdf[predictors,]
 # export ordinal regression model
 outdf = round(outdf,digits=3)
-outfname <- paste(resdir,"ldim_adherence-coefficients.tsv",sep="/")
-write.table(outdf,file=outfname,row.names=TRUE,col.names=NA,sep="\t")
+outfname <- paste(derivdir,"adherence-coefficients.csv",sep="/")
+write.table(outdf,file=outfname,row.names=TRUE,col.names=NA,sep=",")
 
 
 #### export model predictions for plotting in python
@@ -70,5 +70,5 @@ outeffdata <- cbind(outeffdata,MILD_rehearsal_min=mildlength_vals)
 colnames(outeffdata) <- gsub("X","DLQ",colnames(outeffdata))
 
 outeffdata = round(outeffdata,digits=3)
-efffname <- paste(resdir,"ldim_adherence-effects.tsv",sep="/")
-write.table(outeffdata,file=efffname,row.names=FALSE,col.names=TRUE,sep="\t")
+efffname <- paste(derivdir,"adherence-stats.csv",sep="/")
+write.table(outeffdata,file=efffname,row.names=FALSE,col.names=TRUE,sep=",")

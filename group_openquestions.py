@@ -10,10 +10,10 @@ So here, take each night's dream report, open question
 responses, and DLQ1 response, and export 2 text files:
     1. one that lists responses to each open question, grouped by DLQ1
         So OpenQs > DLQ1 > response
-        <openqs-byprobe.txt>
+        <open_questions-by_probe.txt>
     2. one that groups all open questions by lucidity rating
         Sp DLQ1 > OpenQs > response
-        <openqs-byresponse.txt>
+        <open_questions-by_response.txt>
 """
 from os import path
 from json import load
@@ -25,13 +25,13 @@ from collections import OrderedDict
 with open('./config.json') as f:
     p = load(f)
     datadir = path.expanduser(p['data_directory'])
-    resdir  = path.expanduser(p['results_directory'])
+    derivdir = path.expanduser(p['derivatives_directory'])
 
 
 COLS2KEEP = ['night_id','DLQ_01','dream_report',
     'INTERR_1','INTERR_2','INTERR_3','INTERR_4']
-fname = path.join(datadir,'data.tsv')
-df = pd.read_csv(fname,usecols=COLS2KEEP,sep='\t')
+fname = path.join(datadir,'data.csv')
+df = pd.read_csv(fname,usecols=COLS2KEEP)
 
 
 # drop nights without dream recall
@@ -55,8 +55,8 @@ melted_df = df.melt(id_vars=ID_COLS,value_vars=VAL_COLS,
 #     ('Open:4'        , "Describe the sections of your dream report that were relevant to your responding to this question, and explain why."),
 # ])
 
-SORT_ORDERS = dict(byresp=['DLQ_01','probe'],
-                   byprobe=['probe','DLQ_01'])
+SORT_ORDERS = dict(by_response=['DLQ_01','probe'],
+                   by_probe=['probe','DLQ_01'])
 
 for key, sort_order in SORT_ORDERS.items():
     top_col, bot_col = sort_order
@@ -73,6 +73,6 @@ for key, sort_order in SORT_ORDERS.items():
                 response = night_df['response'].values[0]
                 text += f'\t\t{night_id} : {response}\n'
 
-    export_fname = path.join(resdir,f'openqs-{key}.txt')
+    export_fname = path.join(derivdir,f'open_questions-{key}.txt')
     with open(export_fname,'w') as outfile:
         outfile.write(text)

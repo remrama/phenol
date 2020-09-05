@@ -1,4 +1,9 @@
 """
+Get summary statistics for the ENTIRE DLQ.
+
+Here, I'll generate the plot and summary dataframe
+simultaneously since this is just a quick aside thing.
+
 Figure A1
 
 Draw boxplots for all DLQ probes
@@ -21,21 +26,21 @@ import pyplotparams as myplt
 # load directory info from configuration file
 with open('./config.json') as f:
     p = load(f)
-    DATADIR = path.expanduser(p['data_directory'])
-    RESDIR  = path.expanduser(p['results_directory'])
+    DATA_DIR = path.expanduser(p['data_directory'])
+    DERIV_DIR = path.expanduser(p['derivatives_directory'])
     DLQ_STRINGS = p['DLQ_probes']
     FMT = p['float_formatting']
 
 
 ########### export filenames
-plot_fname = path.join(RESDIR,'dlq_descriptives-plot.svg')
-df_fname   = path.join(RESDIR,'dlq_descriptives-data.tsv')
+plot_fname = path.join(DERIV_DIR,'dlq.png')
+df_fname   = path.join(DERIV_DIR,'dlq.csv')
 
 
 ###########  load data  ###########
 
-infname = path.join(DATADIR,'data.tsv')
-df = pd.read_csv(infname,sep='\t')
+infname = path.join(DATA_DIR,'data.csv')
+df = pd.read_csv(infname)
 
 # get rid of dreams without recall
 df.dropna(subset=['dream_report'],axis=0,inplace=True)
@@ -122,4 +127,4 @@ descr_df = pd.concat([cont_df,quartile_df],axis='columns',
 for col in descr_df.columns:
     if 'quantile' in col:
         descr_df[col] = descr_df[col].map(lambda x: FMT % x)
-descr_df.to_csv(df_fname,index=True,index_label='probe',sep='\t')
+descr_df.to_csv(df_fname,index=True,index_label='probe')

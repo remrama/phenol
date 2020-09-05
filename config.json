@@ -1,6 +1,6 @@
 {
-    "data_directory"    : "~/DBp/proj/phenoll/data",
-    "results_directory" : "~/DBp/proj/phenoll/results",
+    "data_directory"        : "../data",
+    "derivatives_directory" : "../derivatives",
 
     "PANAS_positive_probes" : [1,3,5,9,10,12,14,16,17,19],
     "PANAS_negative_probes" : [2,4,6,7,8,11,13,15,18,20],

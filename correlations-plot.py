@@ -21,18 +21,18 @@ import pyplotparams as myplt
 with open('./config.json') as f:
     p = load(f)
     datadir = path.expanduser(p['data_directory'])
-    resdir  = path.expanduser(p['results_directory'])
+    derivdir = path.expanduser(p['derivatives_directory'])
     pos_probes = p['PANAS_positive_probes']
     neg_probes = p['PANAS_negative_probes']
     control_probes = p['DLQ_control_probes']
 
-data_fname = path.join(datadir,'data.tsv')
-resample_fname = path.join(resdir,'correlations-data.tsv')
-stats_fname = path.join(resdir,'correlations-stats.tsv')
+data_fname = path.join(datadir,'data.csv')
+resample_fname = path.join(derivdir,'correlates_withz.csv')
+stats_fname = path.join(derivdir,'correlates-stats.csv')
 
-datadf = pd.read_csv(data_fname,sep='\t')
-rsmpdf = pd.read_csv(resample_fname,sep='\t',index_col='probe')
-statdf = pd.read_csv(stats_fname,sep='\t',index_col='probe')
+datadf = pd.read_csv(data_fname)
+rsmpdf = pd.read_csv(resample_fname,index_col='probe')
+statdf = pd.read_csv(stats_fname,index_col='probe')
 
 # manipulate data SAME WAY was done in the correlation script
 # generate columns that require manipulations of the raw data
@@ -142,7 +142,7 @@ if n_axes % 2 != 0:
     ax.set_xticks([]); ax.set_yticks([])
 
 plt.tight_layout()
-plot_fname = path.join(resdir,'correlations-plot.svg')
+plot_fname = path.join(derivdir,'correlates-plot.png')
 plt.savefig(plot_fname)
 plt.close()
 
@@ -194,6 +194,6 @@ ax.set_xticklabels(xticklabels,rotation=33,ha='right')
 ax.set_xlim(-.5,n_violins-.5)
 
 plt.tight_layout()
-plot_fname = path.join(resdir,'correlations-plot_rs.svg')
+plot_fname = path.join(derivdir,'correlates-plot_zs.png')
 plt.savefig(plot_fname)
 plt.close()

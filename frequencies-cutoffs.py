@@ -3,13 +3,20 @@ Plot the proportion of lucid dreams across
 all subjects and sessions, at different
 DLQ1 cutoffs/criteria.
 
-Also save data and stats dataframes.
-
 The idea here is not to really get a single
 measure of induction success, but to change
 the criterion and measure of lucidity to see
 how induction success varies as a function
 of those two things.
+
+Also save dataframes for raw data and stats.
+For stats, I can't compare all the proportions
+with each other (like I initially did) because
+the proportions of "total dreams" and "total nights"
+have different values for each participant.
+So the only proportions I can compare properly are
+those of the proportion of participants that had an LD.
+This sucks but whatever.
 """
 from os import path
 from json import load
@@ -30,11 +37,11 @@ from matplotlib.ticker import MultipleLocator
 ########  load and manipulate data  #########
 with open('./config.json') as f:
     p = load(f)
-    resdir  = path.expanduser(p['results_directory'])
+    DERIV_DIR = path.expanduser(p['derivatives_directory'])
     FMT = p['float_formatting']
-infname = path.join(resdir,'dlq01-frequencies.tsv')
 
-data = pd.read_csv(infname,index_col='participant_id',sep='\t')
+infname = path.join(DERIV_DIR,'ld_freqs.csv')
+data = pd.read_csv(infname,index_col='participant_id')
 
 n_reports = data.values.sum() # total number of reports
 n_dreams = data.iloc[:,1:].values.sum() # all reports that include dream recall
@@ -72,6 +79,8 @@ for col in df.columns:
 
 
 #########  stats  #########
+
+# ztests comparing subject proportions at each cutoff
 
 # build the combinations of evals and cutoffs for 2way tests
 EVALS = ['subjs','dreams','reports']
@@ -120,10 +129,10 @@ stats_df['p_corr'] = p_corr
 # round values while also changing output format to print full values
 for col in ['z','p','p_corr']:
     stats_df[col] = stats_df[col].map(lambda x: FMT % x)
-df_fname = path.join(resdir,'induction_success_cutoffs-data.tsv')
-stats_fname = path.join(resdir,'induction_success_cutoffs-stats.tsv')
-df.to_csv(df_fname,index=True,sep='\t')
-stats_df.to_csv(stats_fname,float_format=FMT,index=True,sep='\t')
+df_fname = path.join(DERIV_DIR,'ld_freqs-cutoffs_data.csv')
+stats_fname = path.join(DERIV_DIR,'ld_freqs-cutoffs_stats.csv')
+df.to_csv(df_fname,index=True)
+stats_df.to_csv(stats_fname,float_format=FMT,index=True)
 
 
 
@@ -179,6 +188,6 @@ ax.legend(handles=legend_patches,loc='upper right',
 
 plt.tight_layout()
 
-plot_fname = path.join(resdir,'induction_success_cutoffs-plot.svg')
+plot_fname = path.join(DERIV_DIR,'ld_freqs-cutoffs_plot.png')
 plt.savefig(plot_fname)
 plt.close()
