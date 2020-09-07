@@ -1,36 +1,47 @@
 """
-Figure 1A
+Lucidity frequncies aggregated across all participants.
 
-Plot a histogram counting responses per
-lucidity level across all participants,
-and also one that compares just zero
-vs nonzero lucidity.
+Exports 2 histograms, 1 that groups non-zero lucidity and one that doesn't.
+
+Corresponds to figure 1B.
 
 Also export stats dataframe that runs chisquare
 across all DLQs (main plot) and binomial test on subplot.
 """
-
 from os import path
 from json import load
+
+import numpy as np
 import pandas as pd
 from scipy import stats
 
-import matplotlib; matplotlib.use('Qt5Agg') # python3 bug
 import matplotlib.pyplot as plt; plt.ion()
-
-import pyplotparams as myplt
 from matplotlib.ticker import MultipleLocator
+import pyplotparams as myplt
 
-########  load and manipulate data  ########
+
+########  parameter setup  ########
+
 with open('./config.json') as f:
     p = load(f)
-    DERIV_DIR  = path.expanduser(p['derivatives_directory'])
-    FMT = p['float_formatting']
-infname = path.join(DERIV_DIR,'ld_freqs.csv')
-df = pd.read_csv(infname)
+    DERIV_DIR = path.expanduser(p['derivatives_directory'])
+    FLOAT_FMT = p['float_formatting']
+
+IMPORT_FNAME = path.join(DERIV_DIR,'ld_freqs.csv')
+
+EXPORT_FNAME_1 = path.join(DERIV_DIR,'ld_freqs-plot.png')
+EXPORT_FNAME_2 = path.join(DERIV_DIR,'ld_freqs-plot_nonzero.png')
+
+EXPORT_FNAME_3 = path.join(DERIV_DIR,'ld_freqs-stats.csv')
+
+########  load data  ########
+
+df = pd.read_csv(IMPORT_FNAME)
 
 DLQ_COLS = [ f'DLQ01_resp-{i}' for i in range(5) ]
 freqs = df[DLQ_COLS].sum(axis=0).values
+
+####################################
 
 
 ##########  stats on the frequencies  ###########
@@ -60,13 +71,12 @@ nonlucid = freqs[0]
 nonzero_lucid = sum(nonzero_opts)
 obs = [nonlucid,nonzero_lucid]
 p = stats.binom_test(obs,p=0.5,alternative='two-sided')
-stats_df.loc['zeroVSnonzero_DLQ01',['test','chisq','pval']] = ['binomial',pd.np.nan,p]
+stats_df.loc['zeroVSnonzero_DLQ01',['test','chisq','pval']] = ['binomial',np.nan,p]
 
 # export stats dataframe
-stats_df['chisq'] = stats_df['chisq'].map(lambda x: FMT % x)
-stats_df['pval']  = stats_df['pval'].map(lambda x: FMT % x)
-stats_fname = path.join(DERIV_DIR,'ld_freqs-stats.csv')
-stats_df.to_csv(stats_fname,index=True)
+stats_df['chisq'] = stats_df['chisq'].astype(float)
+stats_df['pval']  = stats_df['pval'].astype(float)
+stats_df.to_csv(EXPORT_FNAME_3,float_format=FLOAT_FMT,index=True)
 
 # all_markers = list(matplotlib.markers.MarkerStyle.filled_markers)
 # subjs = df['subj'].tolist()
@@ -114,10 +124,10 @@ ax.legend(handles=myplt.dlqpatches,loc='upper right',
           frameon=False)
 
 plt.tight_layout()
-plot_fname = path.join(DERIV_DIR,'ld_freqs-plot.png')
-plt.savefig(plot_fname)
+plt.savefig(EXPORT_FNAME_1)
 plt.close()
 
+####################################
 
 
 ##########  draw just nonlucid vs nonzero_lucid frequencies  ###########
@@ -145,7 +155,7 @@ ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
 
 plt.tight_layout()
-plot_fname = path.join(DERIV_DIR,'ld_freqs-plot_nonzero.png')
-plt.savefig(plot_fname)
+plt.savefig(EXPORT_FNAME_2)
 plt.close()
 
+####################################

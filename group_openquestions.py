@@ -17,22 +17,33 @@ responses, and DLQ1 response, and export 2 text files:
 """
 from os import path
 from json import load
-import pandas as pd
-
 from collections import OrderedDict
 
+import pandas as pd
+
+
+######  parameter setup  ######
 
 with open('./config.json') as f:
     p = load(f)
-    datadir = path.expanduser(p['data_directory'])
-    derivdir = path.expanduser(p['derivatives_directory'])
-
+    DATA_DIR  = path.expanduser(p['data_directory'])
+    DERIV_DIR = path.expanduser(p['derivatives_directory'])
 
 COLS2KEEP = ['night_id','DLQ_01','dream_report',
     'INTERR_1','INTERR_2','INTERR_3','INTERR_4']
-fname = path.join(datadir,'data.csv')
-df = pd.read_csv(fname,usecols=COLS2KEEP)
 
+IMPORT_FNAME = path.join(DATA_DIR,'data.csv')
+
+ID_COLS = ['night_id','DLQ_01']
+VAL_COLS = [ f'INTERR_{x}' for x in range(5) ]
+
+SORT_ORDERS = dict(by_response=['DLQ_01','probe'],
+                   by_probe=['probe','DLQ_01'])
+
+################################
+
+
+df = pd.read_csv(IMPORT_FNAME,usecols=COLS2KEEP)
 
 # drop nights without dream recall
 df.dropna(subset=['dream_report'],axis=0,inplace=True)
@@ -41,22 +52,8 @@ df['DLQ_01'] = df['DLQ_01'].astype(int)
 
 df.rename(columns={'dream_report':'INTERR_0'},inplace=True)
 
-
-ID_COLS = ['night_id','DLQ_01']
-VAL_COLS = [ f'INTERR_{x}' for x in range(5) ]
 melted_df = df.melt(id_vars=ID_COLS,value_vars=VAL_COLS,
                     var_name='probe',value_name='response')
-
-# OPEN_QUESTIONS = OrderedDict([
-#     ('dreamreport:1' , "Dream report"),
-#     ('Open:1'        , "What level of awareness did you select for the statement I was aware that I was dreaming on a scale of 0-4? Why did you rate your awareness at the value you did?"),
-#     ('Open:2'        , "What kind of experience(s) gave you an impression of your selected level of awareness?"),
-#     ('Open:3'        , "If you did not select 4 (full awareness), why not? What prevented you from attributing full awareness to your dream?"),
-#     ('Open:4'        , "Describe the sections of your dream report that were relevant to your responding to this question, and explain why."),
-# ])
-
-SORT_ORDERS = dict(by_response=['DLQ_01','probe'],
-                   by_probe=['probe','DLQ_01'])
 
 for key, sort_order in SORT_ORDERS.items():
     top_col, bot_col = sort_order
@@ -73,6 +70,8 @@ for key, sort_order in SORT_ORDERS.items():
                 response = night_df['response'].values[0]
                 text += f'\t\t{night_id} : {response}\n'
 
-    export_fname = path.join(derivdir,f'open_questions-{key}.txt')
+    export_fname = path.join(DERIV_DIR,f'open_questions-{key}.txt')
     with open(export_fname,'w') as outfile:
         outfile.write(text)
+
+################################

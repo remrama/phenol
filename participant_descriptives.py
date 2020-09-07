@@ -7,9 +7,9 @@ import pandas as pd
 
 with open('./config.json') as f:
     p = load(f)
-    data_dir = path.expanduser(p['data_directory'])
+    DATA_DIR = path.expanduser(p['data_directory'])
 
-participant_fname = path.join(data_dir,'participants.tsv')
+participant_fname = path.join(DATA_DIR,'participants.tsv')
 
 df = pd.read_csv(participant_fname,sep='\t')
 

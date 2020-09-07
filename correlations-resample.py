@@ -20,31 +20,38 @@ For each dream characteristic, run N iterations.
 Fisher zscoring and pvalues come from correlations-zscore.py
 
 Export dataframe holding all the resampled correlations
-
 """
 from os import path
 from json import load
 import tqdm
+
+import numpy as np
 import pandas as pd
 
-pd.np.random.seed(72) # for reproducibility
+np.random.seed(72) # for reproducibility
 
-# load analysis parameters from configuration file
+
+#########  parameter setup  #########
+
 with open('./config.json') as f:
     p = load(f)
-    DATA_DIR = path.expanduser(p['data_directory'])
+    DATA_DIR  = path.expanduser(p['data_directory'])
     DERIV_DIR = path.expanduser(p['derivatives_directory'])
     POS_PROBES = p['PANAS_positive_probes']
     NEG_PROBES = p['PANAS_negative_probes']
     CONTROL_PROBES = p['DLQ_control_probes']
     N_RESAMPLES = p['n_correlation_resamples']
-    FMT = p['float_formatting']
+    FLOAT_FMT = p['float_formatting']
+
+IMPORT_FNAME = path.join(DATA_DIR,'data.csv')
+EXPORT_FNAME = path.join(DERIV_DIR,'correlates.csv')
+
+######################################
 
 
 #######  load and manipulate data  #######
 
-infname = path.join(DATA_DIR,'data.csv')
-df = pd.read_csv(infname)
+df = pd.read_csv(IMPORT_FNAME)
 
 # drop all nights without recall
 df.dropna(subset=['dream_report'],axis=0,inplace=True)
@@ -77,14 +84,14 @@ res_df = pd.DataFrame(columns=METRICS,index=index,dtype=float)
 # loop over each variable of interest and run N
 # correlations, resampling a random night from
 # each participant every time
-for col in tqdm.tqdm(cols2corr,desc='resampling correlations'):
+for col in tqdm.tqdm(cols2corr,desc='variables of interest'):
     # if it's one of the CHAR columns, then the
     # 0 option is "no recall" so take that out
     if 'CHAR' in col:
         subdf = df[ df[col] > 0 ]
     else:
         subdf = df
-    for i in tqdm.trange(N_RESAMPLES,desc=col,leave=False):
+    for i in tqdm.trange(N_RESAMPLES,desc='resamples',leave=False):
         # sample one night from each subject, randomly
         rsmpl_df = subdf.groupby('participant_id').apply(
             lambda df: df.sample(1))[['DLQ_01',col]]
@@ -93,17 +100,12 @@ for col in tqdm.tqdm(cols2corr,desc='resampling correlations'):
         # get the slope/intercept for later plotting
         x = rsmpl_df[col].values
         y = rsmpl_df['DLQ_01'].values
-        m, b = pd.np.polyfit(x,y,1)
+        m, b = np.polyfit(x,y,1)
         # save to dataframe
         res_df.loc[(col,i),METRICS] = [m,b,r]
 
 
-########  export  ########
+# export
+res_df.to_csv(EXPORT_FNAME,float_format=FLOAT_FMT,index=True)
 
-# round values while also changing output format to print full values
-for col in res_df.columns:
-    res_df[col] = res_df[col].map(lambda x: FMT % x)
-res_fname = path.join(DERIV_DIR,'correlates.csv')
-res_df.to_csv(res_fname,index=True)
-
-print('\n') # clear last terminal line
+##################################

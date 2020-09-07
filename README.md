@@ -24,11 +24,11 @@ python dlq_descriptives.py    ## outputs <derivatives_dir>/dlq.png
 
 # run frequencies analysis for LD induction success effects
 python frequencies-generate_freqs.py  ## outputs <derivatives_dir>/ld_freqs.csv
+python frequencies-indiv_subjs.py     ## outputs <derivatives_dir>/ld_freqs-subjs.csv
+                                      ## outputs <derivatives_dir>/ld_freqs-subjs.png
 python frequencies-agg.py             ## outputs <derivatives_dir>/ld_freqs-stats.csv
                                       ## outputs <derivatives_dir>/ld_freqs-plot.png
                                       ## outputs <derivatives_dir>/ld_freqs-plot_nonzero.png
-python frequencies-indiv_subjs.py     ## outputs <derivatives_dir>/ld_freqs-subjs.csv
-                                      ## outputs <derivatives_dir>/ld_freqs-subjs.png
 python frequencies-cutoffs.py         ## outputs <derivatives_dir>/ld_freqs-cutoffs_data.csv
                                       ## outputs <derivatives_dir>/ld_freqs-cutoffs_stats.csv
                                       ## outputs <derivatives_dir>/ld_freqs-cutoffs_plot.png

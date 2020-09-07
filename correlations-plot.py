@@ -7,49 +7,37 @@ Outputs 2 plots
 """
 from os import path
 from json import load
+
+import numpy as np
 import pandas as pd
 
-import matplotlib; matplotlib.use('Qt5Agg') # python3 bug
-import matplotlib.pyplot as plt; plt.ion()
-from matplotlib.ticker import MultipleLocator
 import seaborn as sea
+import matplotlib.pyplot as plt; plt.ion()
+from matplotlib import ticker as mticker
 
 import pyplotparams as myplt
 
 
-# load parameters from configuration file
+##########  parameter setup  ##########
+
 with open('./config.json') as f:
     p = load(f)
-    datadir = path.expanduser(p['data_directory'])
-    derivdir = path.expanduser(p['derivatives_directory'])
-    pos_probes = p['PANAS_positive_probes']
-    neg_probes = p['PANAS_negative_probes']
-    control_probes = p['DLQ_control_probes']
+    DATA_DIR  = path.expanduser(p['data_directory'])
+    DERIV_DIR = path.expanduser(p['derivatives_directory'])
+    POS_PROBES = p['PANAS_positive_probes']
+    NEG_PROBES = p['PANAS_negative_probes']
+    CONTROL_PROBES = p['DLQ_control_probes']
 
-data_fname = path.join(datadir,'data.csv')
-resample_fname = path.join(derivdir,'correlates_withz.csv')
-stats_fname = path.join(derivdir,'correlates-stats.csv')
+PALETTE = { x: myplt.dlqcolor(x) for x in myplt.DLQ_STRINGS.keys() }
 
-datadf = pd.read_csv(data_fname)
-rsmpdf = pd.read_csv(resample_fname,index_col='probe')
-statdf = pd.read_csv(stats_fname,index_col='probe')
+IMPORT_FNAME_DATA = path.join(DATA_DIR,'data.csv')
+IMPORT_FNAME_CORR = path.join(DERIV_DIR,'correlates_withz.csv')
+IMPORT_FNAME_STAT = path.join(DERIV_DIR,'correlates-stats.csv')
 
-# manipulate data SAME WAY was done in the correlation script
-# generate columns that require manipulations of the raw data
-panas_pos_cols = [ f'PANAS_{x:02d}' for x in pos_probes ]
-panas_neg_cols = [ f'PANAS_{x:02d}' for x in neg_probes ]
-control_cols   = [ f'DLQ_{x:02d}' for x in control_probes ]
-datadf['PANAS_pos']     = datadf[panas_pos_cols].sum(axis=1)
-datadf['PANAS_neg']     = datadf[panas_neg_cols].sum(axis=1)
-datadf['dream_control'] = datadf[control_cols].mean(axis=1)
+EXPORT_FNAME_1 = path.join(DERIV_DIR,'correlates-plot.png')
+EXPORT_FNAME_2 = path.join(DERIV_DIR,'correlates-plot_zs.png')
 
-
-
-#######  raw data plots with regression lines  #######
-
-palette = { x: myplt.dlqcolor(x) for x in myplt.DLQ_STRINGS.keys() }
-
-xlabel_dict = {
+XLABEL_DICT = {
     'CHAR_sensory'       : 'Dream sensory vividness',
     'CHAR_bizarreness'   : 'Dream bizarreness',
     'CHAR_neg_emo'       : 'Dream negative emotion',
@@ -64,8 +52,31 @@ xlabel_dict = {
     'sleep_quality'      : 'Subjective sleep quality'
 }
 
+#######################################
+
+
+##########  load and manipulate dataa  ##########
+
+datadf = pd.read_csv(IMPORT_FNAME_DATA)
+rsmpdf = pd.read_csv(IMPORT_FNAME_CORR,index_col='probe')
+statdf = pd.read_csv(IMPORT_FNAME_STAT,index_col='probe')
+
+# manipulate data SAME WAY was done in the correlation script
+# generate columns that require manipulations of the raw data
+panas_pos_cols = [ f'PANAS_{x:02d}' for x in POS_PROBES ]
+panas_neg_cols = [ f'PANAS_{x:02d}' for x in NEG_PROBES ]
+control_cols   = [ f'DLQ_{x:02d}' for x in CONTROL_PROBES ]
+datadf['PANAS_pos']     = datadf[panas_pos_cols].sum(axis=1)
+datadf['PANAS_neg']     = datadf[panas_neg_cols].sum(axis=1)
+datadf['dream_control'] = datadf[control_cols].mean(axis=1)
+
+#######################################
+
+
+#######  raw data plots with regression lines  #######
+
 xlims_dict = {}
-for key in xlabel_dict.keys():
+for key in XLABEL_DICT.keys():
     if 'CHAR' in key:
         xlim = (1,9)
     elif 'PANAS' in key:
@@ -76,13 +87,12 @@ for key in xlabel_dict.keys():
         xlim = (1,7)
     xlims_dict[key] = xlim
 
-
 # extract all the columns/variables that we correlated
 correlated_vars = statdf.index
 # one subplot/axis for each variables
 n_axes = len(correlated_vars)
 n_rows = 3
-n_cols = int(pd.np.ceil(n_axes/n_rows))
+n_cols = int(np.ceil(n_axes/n_rows))
 height = 5 * n_rows
 width = 5 * n_cols
 
@@ -92,7 +102,7 @@ fig, axes = plt.subplots(n_rows,n_cols,figsize=(width,height),
 for ax, var in zip(axes.flat,correlated_vars):
 
     xmin, xmax = xlims_dict[var]
-    xlabel = xlabel_dict[var]
+    xlabel = XLABEL_DICT[var]
     
     # scatterplot
     if 'CHAR' in var:
@@ -101,7 +111,7 @@ for ax, var in zip(axes.flat,correlated_vars):
         plotdf = datadf
     sea.swarmplot(y='DLQ_01',x=var,data=plotdf,
         size=6,linewidth=1,#jitter=.2,
-        palette=palette,orient='h',ax=ax)
+        palette=PALETTE,orient='h',ax=ax)
 
     ax.invert_yaxis()
     ax.set_yticks(range(0,5))
@@ -109,10 +119,10 @@ for ax, var in zip(axes.flat,correlated_vars):
     ax.set_xticks([xmin,xmax])
     ax.set_xlabel(xlabel)
     if xmax > 10:
-        ax.xaxis.set_minor_locator(MultipleLocator(5))
+        ax.xaxis.set_minor_locator(mticker.MultipleLocator(5))
         ax.set_xlim(xmin-2,xmax+2)
     else:
-        ax.xaxis.set_minor_locator(MultipleLocator(1))
+        ax.xaxis.set_minor_locator(mticker.MultipleLocator(1))
         ax.set_xlim(xmin-.5,xmax+.5)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
@@ -126,10 +136,8 @@ for ax, var in zip(axes.flat,correlated_vars):
         for tic in ax.yaxis.get_major_ticks():
             tic.tick1On = tic.tick2On = False
 
-
-
     slope, intercept = statdf.loc[var,['slope_mean','intercept_mean']]
-    x = pd.np.arange(xmin,xmax+1)
+    x = np.arange(xmin,xmax+1)
     line = slope*x + intercept
     ax.plot(x,line,color='k',linewidth=1)
 
@@ -142,10 +150,10 @@ if n_axes % 2 != 0:
     ax.set_xticks([]); ax.set_yticks([])
 
 plt.tight_layout()
-plot_fname = path.join(derivdir,'correlates-plot.png')
-plt.savefig(plot_fname)
+plt.savefig(EXPORT_FNAME_1)
 plt.close()
 
+#######################################
 
 
 ########### plot the fisher zscores ###########
@@ -158,7 +166,7 @@ ymin, ymax = -2.2, 2.2
 
 violin_data = [ rsmpdf.loc[var,'fishz'].values for var in correlated_vars ]
 viols = ax.violinplot(violin_data,positions=range(n_violins),
-                      widths=pd.np.repeat(.5,n_violins),
+                      widths=np.repeat(.5,n_violins),
                       showextrema=False)
 plt.setp(viols['bodies'],facecolor='gray',edgecolor='white')
 
@@ -177,23 +185,22 @@ for x, var in enumerate(correlated_vars):
     elif p < .1:
         ax.plot(x,ymark,marker='^',fillstyle='none',color='k',markersize=7)
 
-
 ax.axhline(0,linestyle='--',linewidth=.25,color='k')
 
 ax.set_ylabel('Correlation with DLQ-1\n($\\tau$ $\it{z}$-score)')
 ax.set_ylim(ymin,ymax)
-ax.yaxis.set_major_locator(MultipleLocator(1))
-ax.yaxis.set_minor_locator(MultipleLocator(.25))
+ax.yaxis.set_major_locator(mticker.MultipleLocator(1))
+ax.yaxis.set_minor_locator(mticker.MultipleLocator(.25))
 ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
 
-
 ax.set_xticks(range(n_violins))
-xticklabels = [ xlabel_dict[var] for var in correlated_vars ]
+xticklabels = [ XLABEL_DICT[var] for var in correlated_vars ]
 ax.set_xticklabels(xticklabels,rotation=33,ha='right')
 ax.set_xlim(-.5,n_violins-.5)
 
 plt.tight_layout()
-plot_fname = path.join(derivdir,'correlates-plot_zs.png')
-plt.savefig(plot_fname)
+plt.savefig(EXPORT_FNAME_2)
 plt.close()
+
+#######################################

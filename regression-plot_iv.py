@@ -7,23 +7,22 @@ from os import path
 from json import load
 import pandas as pd
 
-import matplotlib; matplotlib.use('Qt5Agg') # python3 bug
-import matplotlib.pyplot as plt; plt.ion()
 import seaborn as sea
+import matplotlib.pyplot as plt; plt.ion()
+from matplotlib import ticker as mticker
 
 import pyplotparams as myplt
-from matplotlib.ticker import MultipleLocator
 
+
+########  parameter setup  ########
 
 with open('./config.json') as f:
     p = load(f)
-    datadir = path.expanduser(p['data_directory'])
-    derivdir = path.expanduser(p['derivatives_directory'])
+    DATA_DIR = path.expanduser(p['data_directory'])
+    DERIV_DIR = path.expanduser(p['derivatives_directory'])
 
-infname = path.join(datadir,'data.csv')
-outfname = path.join(derivdir,'adherence.png')
-
-df = pd.read_csv(infname)
+IMPORT_FNAME = path.join(DATA_DIR,'data.csv')
+EXPORT_FNAME = path.join(DERIV_DIR,'adherence.png')
 
 PREDICTORS = ['n_reality_checks','MILD_rehearsal_min','MILD_awake_min']
 XLABELS = dict(
@@ -42,11 +41,19 @@ XTICKS_MINOR = dict(
     MILD_awake_min=5,
 )
 
+PALETTE = { x: myplt.dlqcolor(x) for x in myplt.DLQ_STRINGS.keys() }
+
+###################################
+
+
+########  draw plot  ########
+
+# load data
+df = pd.read_csv(IMPORT_FNAME)
+
 # # only keep rows with recall
 # mildlength = df.loc[~df['DLQ:1'].isnull(),'mildlength'].values
 # dlqresp    = df.loc[~df['DLQ:1'].isnull(),'DLQ:1'].values
-
-palette = { x: myplt.dlqcolor(x) for x in myplt.DLQ_STRINGS.keys() }
 
 fig, axes = plt.subplots(1,len(PREDICTORS),figsize=(5*len(PREDICTORS),6))
 
@@ -54,14 +61,14 @@ for i, (ax,col) in enumerate(zip(axes,PREDICTORS)):
 
     sea.swarmplot(y='DLQ_01',x=col,data=df,
         size=8,linewidth=1,#jitter=.2,
-        palette=palette,
+        palette=PALETTE,
         ax=ax,orient='h')
 
     # aesthetics
     ax.set_ylim(-.7,4.7)
     ax.set_yticks([0,1,2,3,4])
-    ax.xaxis.set_major_locator(MultipleLocator(XTICKS_MAJOR[col]))
-    ax.xaxis.set_minor_locator(MultipleLocator(XTICKS_MINOR[col]))
+    ax.xaxis.set_major_locator(mticker.MultipleLocator(XTICKS_MAJOR[col]))
+    ax.xaxis.set_minor_locator(mticker.MultipleLocator(XTICKS_MINOR[col]))
     ax.set_xlabel(XLABELS[col])
     ax.grid(True,axis='y',which='major',linestyle='--',
             linewidth=.25,color='k',alpha=1)
@@ -77,23 +84,7 @@ for i, (ax,col) in enumerate(zip(axes,PREDICTORS)):
 
 
 plt.tight_layout()
-plt.savefig(outfname)
+plt.savefig(EXPORT_FNAME)
 plt.close()
 
-
-
-# sea.stripplot(x=dlqresp,y=mildlength,
-#     linewidth=1,palette=palette,jitter=2,
-#     size=10,
-#     ax=ax)
-
-# sea.swarmplot(y='mildlength',data=df,hue='DLQ:1',palette=palette)
-
-# ax.scatter(x=resp-1,y=mildlength,edgecolors='k',
-#     color=[ getcolor(x) for x in resp ],linewidths=1,
-#     s=80)
-
-# # plt.setp(legend.get_title(),fontsize='xx-small')
-
-
-
+###################################

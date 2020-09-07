@@ -1,0 +1,11 @@
+name: phenoll
+
+dependencies:
+  - python=3
+  - ipython
+  - numpy=1.19.1
+  - pandas=1.1.0
+  - matplotlib
+  - seaborn=0.10.1
+  - conda-forge::tqdm
+  - conda-forge::pingouin=0.3.8

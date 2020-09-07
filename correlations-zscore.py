@@ -11,30 +11,41 @@ just an additional column for the fisher zscores.
 """
 from os import path
 from json import load
+
 import numpy as np
 import pandas as pd
 
 from statsmodels.stats.multitest import fdrcorrection
 
 
-# load results directory from configuration file
+#######  parameter setup  #######
+
 with open('./config.json') as f:
     p = load(f)
     DERIV_DIR = path.expanduser(p['derivatives_directory'])
-    FMT = p['float_formatting']
+    FLOAT_FMT = p['float_formatting']
     N_RESAMPLES = p['n_correlation_resamples']
+
 # choose params to make 95% confidence intervals
 CI_LO = .025
 CI_HI = .975
 
+IMPORT_FNAME = path.join(DERIV_DIR,'correlates.csv')
 
-#######  load and manipulate data  #######
+EXPORT_FNAME_1 = path.join(DERIV_DIR,'correlates-stats.csv')
+EXPORT_FNAME_2 = path.join(DERIV_DIR,'correlates_withz.csv')
 
-infname = path.join(DERIV_DIR,'correlates.csv')
-res_df = pd.read_csv(infname,index_col=['probe','resample'])
+##################################
 
 
-#######  derive pvalues  #######
+#######  load data  #######
+
+res_df = pd.read_csv(IMPORT_FNAME,index_col=['probe','resample'])
+
+###########################
+
+
+#######  fisher zscore  #######
 
 # fisher zscore all r values
 def fisherz(x):
@@ -44,6 +55,13 @@ def fisherz(x):
         x -= np.sign(x) * .000001 # picked 6 decimal points bc that's the precision of other values
     return np.arctanh(x)
 res_df['fishz'] = res_df['tau'].map(fisherz)
+
+res_df.to_csv(EXPORT_FNAME_2,float_format=FLOAT_FMT,index=True)
+
+################################
+
+
+#######  run some stats  #######
 
 # initialize stats dataframe with the mean of each metric
 stats_df = res_df.groupby('probe').mean()
@@ -68,19 +86,9 @@ uncorrected_pvals = stats_df['pval'].values
 _, corrp = fdrcorrection(uncorrected_pvals,method='indep',is_sorted=False)
 stats_df['pval_corrected'] = corrp
 
-
-########  export dataframes  ########
-
 # set it up so everything will be ordered by correlation effect
 stats_df.sort_values('pval',ascending=True,inplace=True)
 
-# round values while also changing output format to print full values
-for df in [stats_df,res_df]:
-    for col in df.columns:
-        df[col] = df[col].map(lambda x: FMT % x)
+stats_df.to_csv(EXPORT_FNAME_1,float_format=FLOAT_FMT,index=True)
 
-stats_fname = path.join(DERIV_DIR,'correlates-stats.csv')
-stats_df.to_csv(stats_fname,index=True)
-
-z_fname = path.join(DERIV_DIR,'correlates_withz.csv')
-res_df.to_csv(z_fname,index=True)
+################################

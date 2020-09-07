@@ -3,45 +3,52 @@ Plot the proportion of lucid dreams across
 all subjects and sessions, at different
 DLQ1 cutoffs/criteria.
 
+Corresponds to figure 1C.
+
+Also export data and stats performed on data.
+
 The idea here is not to really get a single
 measure of induction success, but to change
 the criterion and measure of lucidity to see
 how induction success varies as a function
 of those two things.
-
-Also save dataframes for raw data and stats.
-For stats, I can't compare all the proportions
-with each other (like I initially did) because
-the proportions of "total dreams" and "total nights"
-have different values for each participant.
-So the only proportions I can compare properly are
-those of the proportion of participants that had an LD.
-This sucks but whatever.
 """
 from os import path
 from json import load
-import pandas as pd
 import itertools
+
+import numpy as np
+import pandas as pd
 
 from statsmodels.stats.proportion import proportions_ztest
 from statsmodels.stats.multitest import fdrcorrection
 
-import matplotlib; matplotlib.use('Qt5Agg') # python3 bug
 import matplotlib.pyplot as plt; plt.ion()
+from matplotlib import lines as mlines
+from matplotlib import ticker as mticker
 
 import pyplotparams as myplt
-from matplotlib.ticker import MultipleLocator
 
 
+########  parameter setup  #########
 
-########  load and manipulate data  #########
 with open('./config.json') as f:
     p = load(f)
     DERIV_DIR = path.expanduser(p['derivatives_directory'])
-    FMT = p['float_formatting']
+    FLOAT_FMT = p['float_formatting']
 
-infname = path.join(DERIV_DIR,'ld_freqs.csv')
-data = pd.read_csv(infname,index_col='participant_id')
+IMPORT_FNAME = path.join(DERIV_DIR,'ld_freqs.csv')
+
+EXPORT_FNAME_DATA = path.join(DERIV_DIR,'ld_freqs-cutoffs_data.csv')
+EXPORT_FNAME_STAT = path.join(DERIV_DIR,'ld_freqs-cutoffs_stats.csv')
+EXPORT_FNAME_PLOT = path.join(DERIV_DIR,'ld_freqs-cutoffs_plot.png')
+
+####################################
+
+
+########  load and manipulate data  #########
+
+data = pd.read_csv(IMPORT_FNAME,index_col='participant_id')
 
 n_reports = data.values.sum() # total number of reports
 n_dreams = data.iloc[:,1:].values.sum() # all reports that include dream recall
@@ -52,7 +59,7 @@ n_subjs = data.shape[0]
 # note that this is a cumulative sum thing.
 
 # get the cumulative sum of LDs at each cutoff
-cumsum_cols = pd.np.roll(data.columns.sort_values(ascending=False),-1).tolist()
+cumsum_cols = np.roll(data.columns.sort_values(ascending=False),-1).tolist()
 cumsum_df = data[cumsum_cols].cumsum(axis=1)
 
 # don't use response of 1 ("Not at all") or "No recall"
@@ -76,6 +83,8 @@ df['proportion_subjs'] = df['subjs_past_cutoff'] / n_subjs
 for col in df.columns:
     if 'proportion' in col:
         df[col] = df[col].round(2)
+
+####################################
 
 
 #########  stats  #########
@@ -128,12 +137,11 @@ stats_df['p_corr'] = p_corr
 # export data and results dataframes
 # round values while also changing output format to print full values
 for col in ['z','p','p_corr']:
-    stats_df[col] = stats_df[col].map(lambda x: FMT % x)
-df_fname = path.join(DERIV_DIR,'ld_freqs-cutoffs_data.csv')
-stats_fname = path.join(DERIV_DIR,'ld_freqs-cutoffs_stats.csv')
-df.to_csv(df_fname,index=True)
-stats_df.to_csv(stats_fname,float_format=FMT,index=True)
+    stats_df[col] = stats_df[col].astype(float)
+df.to_csv(EXPORT_FNAME_DATA,float_format=FLOAT_FMT,index=True)
+stats_df.to_csv(EXPORT_FNAME_STAT,float_format=FLOAT_FMT,index=True)
 
+####################################
 
 
 #########  draw plot  #########
@@ -166,8 +174,8 @@ ax.set_xticklabels(xticklabels,rotation=25,ha='right')
 ax.set_xlabel('Lucid dream criterion')
 
 # handle yaxes
-ax.yaxis.set_major_locator(MultipleLocator(.1))
-ax.yaxis.set_minor_locator(MultipleLocator(.05))
+ax.yaxis.set_major_locator(mticker.MultipleLocator(.1))
+ax.yaxis.set_minor_locator(mticker.MultipleLocator(.05))
 ax.set_xlim(0.5,4.5)
 ax.set_ylim(0,1)
 ax.set_ylabel('Lucidity induction success')
@@ -179,7 +187,7 @@ ax.grid(True,axis='y',which='minor',
         linestyle='--',linewidth=.25,color='k',alpha=1)
 
 # legend for markers
-legend_patches = [ matplotlib.lines.Line2D([],[],
+legend_patches = [ mlines.Line2D([],[],
                     label=label,marker=markers[key],
                     color='gray',linestyle='none')
                 for key, label in labels.items() ]
@@ -187,7 +195,7 @@ ax.legend(handles=legend_patches,loc='upper right',
           title='Evaluation',frameon=True,framealpha=1,edgecolor='k')
 
 plt.tight_layout()
-
-plot_fname = path.join(DERIV_DIR,'ld_freqs-cutoffs_plot.png')
-plt.savefig(plot_fname)
+plt.savefig(EXPORT_FNAME_PLOT)
 plt.close()
+
+####################################
