@@ -96,8 +96,8 @@ correlated_vars = statdf.index
 n_axes = len(correlated_vars)
 n_rows = 3
 n_cols = int(np.ceil(n_axes/n_rows))
-height = 5 * n_rows
-width = 5 * n_cols
+height = 1.8 * n_rows
+width = 1.8 * n_cols
 
 fig, axes = plt.subplots(n_rows,n_cols,figsize=(width,height),
                          squeeze=False,sharex=False,sharey=False)
@@ -113,7 +113,7 @@ for ax, var in zip(axes.flat,correlated_vars):
     else:
         plotdf = datadf
     sea.swarmplot(y='DLQ_01',x=var,data=plotdf,
-        size=6,linewidth=1,#jitter=.2,
+        size=4,linewidth=1,#jitter=.2,
         palette=PALETTE,orient='h',ax=ax)
 
     ax.invert_yaxis()
@@ -131,7 +131,7 @@ for ax, var in zip(axes.flat,correlated_vars):
     ax.spines['right'].set_visible(False)
     ax.grid(True,axis='y',which='major',linestyle='--',linewidth=.25,color='k',alpha=1)
     if ax == axes.flat[0]:
-        ax.set_ylabel('I was aware that I was dreaming')
+        ax.set_ylabel('Lucidity')
         ax.set_yticklabels(list(myplt.DLQ_STRINGS.values()),rotation=25)
     else:
         ax.set_ylabel('')
@@ -163,8 +163,8 @@ plt.close()
 ########### plot the fisher zscores ###########
 
 n_violins = n_axes
-width = 1 * n_violins
-fig, ax = plt.subplots(figsize=(width,5))
+width = .4 * n_violins
+fig, ax = plt.subplots(figsize=(width,3))
 
 ymin, ymax = -2.2, 2.2
 
@@ -185,13 +185,13 @@ for x, var in enumerate(correlated_vars):
     ymark = ymax - .2
     p, pcorr = statdf.loc[var,['pval','pval_corrected']]
     if p < .05:
-        ax.plot(x,ymark,marker='*',fillstyle='none',color='k',markersize=7)
+        ax.plot(x,ymark,marker='*',fillstyle='none',color='k',markersize=5,mew=.7)
     elif p < .1:
-        ax.plot(x,ymark,marker='^',fillstyle='none',color='k',markersize=7)
+        ax.plot(x,ymark,marker='^',fillstyle='none',color='k',markersize=5,mew=.7)
 
 ax.axhline(0,linestyle='--',linewidth=.25,color='k')
 
-ax.set_ylabel('Correlation with DLQ-1\n($\\tau$ $\it{z}$-score)')
+ax.set_ylabel('Correlation with lucidity\n($\\tau$ $\it{z}$-score)')
 ax.set_ylim(ymin,ymax)
 ax.yaxis.set_major_locator(mticker.MultipleLocator(1))
 ax.yaxis.set_minor_locator(mticker.MultipleLocator(.25))

@@ -9,13 +9,13 @@ import matplotlib.pyplot
 # change default parameters
 matplotlib.rcParams['font.family'] = 'sans-serif'
 matplotlib.rcParams['font.sans-serif'] = 'Arial'
-matplotlib.rcParams['axes.labelsize'] = 'x-large'
-matplotlib.rcParams['xtick.labelsize'] = 'large'
-matplotlib.rcParams['ytick.labelsize'] = 'large'
+matplotlib.rcParams['axes.labelsize'] = 9
+matplotlib.rcParams['xtick.labelsize'] = 7
+matplotlib.rcParams['ytick.labelsize'] = 7
 matplotlib.rcParams['xtick.major.size'] = 5
+matplotlib.rcParams['xtick.minor.size'] = 3
 matplotlib.rcParams['ytick.major.size'] = 5
-matplotlib.rcParams['legend.fontsize'] = 'small'
-matplotlib.rcParams['legend.title_fontsize'] = 'medium'
+matplotlib.rcParams['ytick.minor.size'] = 3
 matplotlib.rcParams['savefig.dpi'] = 300
 matplotlib.rcParams['svg.fonttype'] = 'none'
 

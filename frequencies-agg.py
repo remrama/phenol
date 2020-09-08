@@ -2,6 +2,7 @@
 Lucidity frequncies aggregated across all participants.
 
 Exports 2 histograms, 1 that groups non-zero lucidity and one that doesn't.
+But 1 figure, latter is inset of former.
 
 Corresponds to figure 1B.
 
@@ -16,7 +17,7 @@ import pandas as pd
 from scipy import stats
 
 import matplotlib.pyplot as plt; plt.ion()
-from matplotlib.ticker import MultipleLocator
+from matplotlib import ticker as mticker
 import pyplotparams as myplt
 
 
@@ -29,10 +30,17 @@ with open('./config.json') as f:
 
 IMPORT_FNAME = path.join(DERIV_DIR,'ld_freqs.csv')
 
-EXPORT_FNAME_1 = path.join(DERIV_DIR,'ld_freqs-plot.png')
-EXPORT_FNAME_2 = path.join(DERIV_DIR,'ld_freqs-plot_nonzero.png')
+EXPORT_FNAME_PLOT = path.join(DERIV_DIR,'ld_freqs-plot.png')
+EXPORT_FNAME_STAT = path.join(DERIV_DIR,'ld_freqs-stats.csv')
 
-EXPORT_FNAME_3 = path.join(DERIV_DIR,'ld_freqs-stats.csv')
+FIG_WIDTH = 1.75
+FIG_HEIGHT = 3
+
+TICK_FONTSIZE = 6 # diff than custom defaults
+XTICK_FONTSIZE_INSET = 6
+
+####################################
+
 
 ########  load data  ########
 
@@ -76,86 +84,61 @@ stats_df.loc['zeroVSnonzero_DLQ01',['test','chisq','pval']] = ['binomial',np.nan
 # export stats dataframe
 stats_df['chisq'] = stats_df['chisq'].astype(float)
 stats_df['pval']  = stats_df['pval'].astype(float)
-stats_df.to_csv(EXPORT_FNAME_3,float_format=FLOAT_FMT,index=True)
+stats_df.to_csv(EXPORT_FNAME_STAT,float_format=FLOAT_FMT,index=True)
 
-# all_markers = list(matplotlib.markers.MarkerStyle.filled_markers)
-# subjs = df['subj'].tolist()
-# xvals = []
-# yvals = []
-# markers = []
-# counts = { x: 1 for x in [1,2,3,4,5] }
-# for _, row in df.iterrows():
-#     resp = row['DLQ:1']
-#     if not pd.np.isnan(resp):
-#         subj = row['subj']
-#         mark = all_markers[subjs.index(subj)]
-#         yval = counts[resp]
-#         counts[resp] += 1
-
-#         xvals.append(resp)
-#         yvals.append(yval)
-#         markers.append(mark)
+####################################
 
 
 ##########  draw all frequencies  ###########
 
-fig, ax = plt.subplots(figsize=(4,7))
+fig, ax = plt.subplots(figsize=(FIG_WIDTH,FIG_HEIGHT))
 
-# for x, y, m in zip(xvals,yvals,markers):
-#     c = myplt.dlqcolor(x)
-#     ax.scatter(x,y,color=c,marker=m,edgecolors='k',linewidths=.5,s=85)
 colors = [ myplt.dlqcolor(i) for i in range(5) ]
 xvals = range(5)
 ax.bar(xvals,freqs,color=colors,edgecolor='k',width=1,linewidth=.5)
 
 ax.set_xlim(-.75,4.75)
 ax.set_ylim(0,max(freqs)+1)
-ax.yaxis.set_major_locator(MultipleLocator(20))
-ax.yaxis.set_minor_locator(MultipleLocator(5))
+ax.yaxis.set_major_locator(mticker.MultipleLocator(20))
+ax.yaxis.set_minor_locator(mticker.MultipleLocator(5))
 ax.set_xticks(range(5))
-ax.set_xticklabels(list(myplt.DLQ_STRINGS.values()),rotation=25,ha='right')
+ax.set_xticklabels(list(myplt.DLQ_STRINGS.values()),rotation=25,
+                   ha='right',fontsize=TICK_FONTSIZE)
 ax.set_ylabel('Number of nights')
-ax.set_xlabel('I was aware that I was dreaming.')
+ax.set_xlabel('Lucidity')
 ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
-
-ax.legend(handles=myplt.dlqpatches,loc='upper right',
-          title='I was aware that I was dreaming.',
-          frameon=False)
-
-plt.tight_layout()
-plt.savefig(EXPORT_FNAME_1)
-plt.close()
 
 ####################################
 
 
 ##########  draw just nonlucid vs nonzero_lucid frequencies  ###########
 
-fig, ax = plt.subplots(figsize=(4,7))
+ax2 = ax.inset_axes([0.6, 0.6, 0.4, 0.5])
 
 colors = [ myplt.dlqcolor(0), 'gray' ]
 xvals = [1,2]
 yvals = [nonlucid,nonzero_lucid]
-ax.bar(xvals,yvals,color=colors,edgecolor='k',width=1,linewidth=.5)
+ax2.bar(xvals,yvals,color=colors,edgecolor='k',width=1,linewidth=.5)
 
-ax.set_xlim(.25,2.75)
-ax.set_ylim(0,max(yvals)+1)
-ax.yaxis.set_major_locator(MultipleLocator(20))
-ax.yaxis.set_minor_locator(MultipleLocator(5))
-ax.set_yticklabels([])
-ax.set_xticks([1,2])
+ax2.set_xlim(.25,2.75)
+ax2.set_ylim(0,max(yvals)+1)
+ax2.yaxis.set_major_locator(mticker.MultipleLocator(20))
+ax2.yaxis.set_minor_locator(mticker.MultipleLocator(5))
+ax2.set_yticklabels([])
+ax2.set_xticks([1,2])
 first_ticklabel = list(myplt.DLQ_STRINGS.values())[0]
 second_ticklabel = '>= ' + list(myplt.DLQ_STRINGS.values())[1]
 xticklabels = [first_ticklabel,second_ticklabel]
-ax.set_xticklabels(xticklabels,rotation=25,ha='right')
-ax.set_ylabel('Number of nights')
-ax.set_xlabel('I was aware that I was dreaming.')
-ax.spines['top'].set_visible(False)
-ax.spines['right'].set_visible(False)
+ax2.set_xticklabels(xticklabels,rotation=25,ha='right',fontsize=XTICK_FONTSIZE_INSET)
+ax2.spines['top'].set_visible(False)
+ax2.spines['right'].set_visible(False)
+for tic in ax2.xaxis.get_major_ticks():
+    tic.tick1line.set_visible(False)
+    tic.tick2line.set_visible(False)
 
 plt.tight_layout()
-plt.savefig(EXPORT_FNAME_2)
+plt.savefig(EXPORT_FNAME_PLOT)
 plt.close()
 
 ####################################

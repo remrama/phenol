@@ -20,6 +20,9 @@ with open('./config.json') as f:
 IMPORT_FNAME = path.join(DERIV_DIR,'adherence-probs.csv')
 EXPORT_FNAME = IMPORT_FNAME.replace('.csv','.png')
 
+FIG_WIDTH = 3.5
+FIG_HEIGHT = 3.5
+
 ######################################
 
 
@@ -39,7 +42,7 @@ cumsum_df = df.cumsum(axis=1)
 
 xvals = cumsum_df.index.values
 
-fig, ax = plt.subplots(figsize=(7,6))
+fig, ax = plt.subplots(figsize=(FIG_WIDTH,FIG_HEIGHT))
 
 for col, series in cumsum_df.iteritems():
     color = myplt.dlqcolor(int(col[-1]))
@@ -55,8 +58,12 @@ ax.set_xlabel('MILD rehearsal length (minutes)')
 ax.set_ylabel('Probability of reaching lucidity level')
 
 ax.legend(handles=myplt.dlqpatches,loc='lower left',
-          title='I was aware that I was dreaming.',
-          frameon=False)
+          title='Lucidity',
+          frameon=False,
+          title_fontsize=9,fontsize=7,
+          labelspacing=0.4, # vertical space between the legend entries
+          borderaxespad=1,
+)
 
 plt.tight_layout()
 plt.savefig(EXPORT_FNAME)

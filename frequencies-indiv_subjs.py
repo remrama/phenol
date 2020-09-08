@@ -27,6 +27,9 @@ IMPORT_FNAME = path.join(DERIV_DIR,'ld_freqs.csv')
 EXPORT_FNAME_DATA = path.join(DERIV_DIR,'ld_freqs-subjs.csv')
 EXPORT_FNAME_PLOT = path.join(DERIV_DIR,'ld_freqs-subjs.png')
 
+FIG_WIDTH = 5
+FIG_HEIGHT = 3
+
 #############################################
 
 
@@ -46,7 +49,7 @@ cumsum_df.to_csv(EXPORT_FNAME_DATA,index=True)
 
 #########  draw the plot  #########
 
-fig, ax = plt.subplots(figsize=(8,5))
+fig, ax = plt.subplots(figsize=(FIG_WIDTH,FIG_HEIGHT))
 
 xvals = range(cumsum_df.index.size)
 for col, series in cumsum_df.iteritems():
@@ -61,7 +64,7 @@ for col, series in cumsum_df.iteritems():
 
 ax.set_xticks(range(cumsum_df.max().max()+1))
 ax.set_yticks(range(min(xvals),max(xvals)+1))
-ax.set_yticklabels(cumsum_df.index.values)
+ax.set_yticklabels(np.arange(cumsum_df.index.nunique())+1)
 ax.set_xlabel('Number of nights')
 ax.set_ylabel('Participant')
 ax.invert_yaxis()
@@ -69,9 +72,11 @@ ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
 
 legend_patches = [myplt.norecall_patch] + myplt.dlqpatches
-ax.legend(handles=legend_patches,loc='upper right',
-          title='I was aware that I was dreaming.',
-          frameon=True,bbox_to_anchor=(1.15,1.15))
+leg = ax.legend(handles=legend_patches,loc='center left',
+                title='       I was aware\nthat I was dreaming.\n          (lucidity)',
+                frameon=True,bbox_to_anchor=(1.,.5),
+                title_fontsize=10,fontsize=8)
+plt.setp(leg.get_title(),fontweight='bold')
 
 plt.tight_layout()
 plt.savefig(EXPORT_FNAME_PLOT)

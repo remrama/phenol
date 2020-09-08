@@ -5,6 +5,7 @@ dependencies:
   - ipython
   - numpy=1.19.1
   - pandas=1.1.0
+  - xlrd # to read excel into pandas
   - matplotlib=3.3
   - seaborn=0.10.1
   - conda-forge::tqdm
