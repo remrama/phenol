@@ -61,6 +61,9 @@ datadf = pd.read_csv(IMPORT_FNAME_DATA)
 rsmpdf = pd.read_csv(IMPORT_FNAME_CORR,index_col='probe')
 statdf = pd.read_csv(IMPORT_FNAME_STAT,index_col='probe')
 
+# drop all nights without recall
+datadf.dropna(subset=['dream_report'],axis=0,inplace=True)
+
 # manipulate data SAME WAY was done in the correlation script
 # generate columns that require manipulations of the raw data
 panas_pos_cols = [ f'PANAS_{x:02d}' for x in POS_PROBES ]
@@ -134,7 +137,8 @@ for ax, var in zip(axes.flat,correlated_vars):
         ax.set_ylabel('')
         ax.set_yticklabels([])
         for tic in ax.yaxis.get_major_ticks():
-            tic.tick1On = tic.tick2On = False
+            tic.tick1line.set_visible(False)
+            tic.tick2line.set_visible(False)
 
     slope, intercept = statdf.loc[var,['slope_mean','intercept_mean']]
     x = np.arange(xmin,xmax+1)

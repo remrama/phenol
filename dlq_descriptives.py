@@ -102,16 +102,14 @@ plt.close()
 
 #######  descriptives table/dataframe  #######
 
-# first get quartiles for each DLQ question
-quartile_df = df[probe_cols].quantile(q=[.25,.5,.75]).T
-quartile_df.columns = [ f'quantile_{x}' for x in quartile_df.columns ]
-
-# now get contingency stuff
 # go from wide to long format
 df_melt = df.melt(value_vars=probe_cols,
                   id_vars=['participant_id'],
                   var_name='probe',
                   value_name='likert')
+
+# get mean and quartiles (includes median)
+summ_df = df_melt.groupby('probe')['likert'].describe()
 
 # convert to categorical so 0s will show up in crosstab
 df_melt['likert'] = pd.Categorical(df_melt['likert'],
@@ -126,15 +124,10 @@ cont_df = pd.crosstab(df_melt['probe'],
 # drop extra layer for column index
 cont_df.columns = [ f'freq_likert-{x}' for x in cont_df.columns ]
 
+# combine both dataframes
+descr_df = summ_df.join(cont_df)
 
-## combine both dataframes
-descr_df = pd.concat([cont_df,quartile_df],
-                     axis='columns',
-                     ignore_index=False,
-                     sort=True)
-
-
-# save dataframe
-descr_df.to_csv(TABLE_FNAME,index=True,float_format=FLOAT_FMT,index_label='probe')
+# save
+descr_df.to_csv(TABLE_FNAME,index=True,float_format=FLOAT_FMT)
 
 ###########################################

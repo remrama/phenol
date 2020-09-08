@@ -17,7 +17,7 @@ with open('./config.json') as f:
     p = load(f)
     DERIV_DIR = path.expanduser(p['derivatives_directory'])
 
-IMPORT_FNAME = path.join(DERIV_DIR,'adherence-stats.csv')
+IMPORT_FNAME = path.join(DERIV_DIR,'adherence-probs.csv')
 EXPORT_FNAME = IMPORT_FNAME.replace('.csv','.png')
 
 ######################################

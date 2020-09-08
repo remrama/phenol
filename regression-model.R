@@ -20,8 +20,12 @@ DERIV_DIR <- p$derivatives_directory
 
 IMPORT_FNAME <- paste(DATA_DIR,"data.csv",sep="/")
 
-EXPORT_FNAME_1 <- paste(DERIV_DIR,"adherence-coefficients.csv",sep="/")
-EXPORT_FNAME_2 <- paste(DERIV_DIR,"adherence-stats.csv",sep="/")
+EXPORT_FNAME_STATSTABLE <- paste(DERIV_DIR,"adherence-stats.csv",sep="/")
+EXPORT_FNAME_STATSPRINT <- paste(DERIV_DIR,"adherence-stats.txt",sep="/")
+EXPORT_FNAME_PROBABILITIES <- paste(DERIV_DIR,"adherence-probs.csv",sep="/")
+
+
+sink(EXPORT_FNAME_STATSPRINT)
 
 ###########################
 
@@ -42,12 +46,16 @@ data$DLQ_01 <- factor(data$DLQ_01,ordered=TRUE)
 ####  run regression  ####
 
 # build ordinal regression
-model.fit <- clmm(DLQ_01 ~ (1|participant_id)
-    + n_reality_checks + MILD_rehearsal_min + MILD_awake_min,
+model.fit <- clmm(DLQ_01 ~ n_reality_checks + MILD_rehearsal_min 
+                         + MILD_awake_min   + (1|participant_id) ,
     data=data)
 
 # run regression
+cat('####################################################\n')
+cat('############# ordinal regression\n')
+cat('############# predicting lucidity from lucid dream induction method adherence\n')
 print(summary(model.fit))
+cat('####################################################\n')
 
 # get odds ratios by taking exponent of the coefficients
 # (makes coeffs interpretable)
@@ -67,7 +75,7 @@ outdf <- outdf[predictors,]
 
 # export
 outdf = round(outdf,digits=3)
-write.table(outdf,file=EXPORT_FNAME_1,row.names=TRUE,col.names=NA,sep=",")
+write.table(outdf,file=EXPORT_FNAME_STATSTABLE,row.names=TRUE,col.names=NA,sep=",")
 
 #######################
 
@@ -86,6 +94,6 @@ outeffdata <- cbind(outeffdata,MILD_rehearsal_min=mildlength_vals)
 colnames(outeffdata) <- gsub("X","DLQ",colnames(outeffdata))
 
 outeffdata = round(outeffdata,digits=3)
-write.table(outeffdata,file=EXPORT_FNAME_2,row.names=FALSE,col.names=TRUE,sep=",")
+write.table(outeffdata,file=EXPORT_FNAME_PROBABILITIES,row.names=FALSE,col.names=TRUE,sep=",")
 
 #######################

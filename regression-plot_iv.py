@@ -51,9 +51,9 @@ PALETTE = { x: myplt.dlqcolor(x) for x in myplt.DLQ_STRINGS.keys() }
 # load data
 df = pd.read_csv(IMPORT_FNAME)
 
-# # only keep rows with recall
-# mildlength = df.loc[~df['DLQ:1'].isnull(),'mildlength'].values
-# dlqresp    = df.loc[~df['DLQ:1'].isnull(),'DLQ:1'].values
+# drop all nights without recall
+df.dropna(subset=['dream_report'],axis=0,inplace=True)
+
 
 fig, axes = plt.subplots(1,len(PREDICTORS),figsize=(5*len(PREDICTORS),6))
 
