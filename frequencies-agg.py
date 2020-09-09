@@ -5,16 +5,12 @@ Exports 2 histograms, 1 that groups non-zero lucidity and one that doesn't.
 But 1 figure, latter is inset of former.
 
 Corresponds to figure 1B.
-
-Also export stats dataframe that runs chisquare
-across all DLQs (main plot) and binomial test on subplot.
 """
 from os import path
 from json import load
 
 import numpy as np
 import pandas as pd
-from scipy import stats
 
 import matplotlib.pyplot as plt; plt.ion()
 from matplotlib import ticker as mticker
@@ -30,8 +26,7 @@ with open('./config.json') as f:
 
 IMPORT_FNAME = path.join(DERIV_DIR,'ld_freqs.csv')
 
-EXPORT_FNAME_PLOT = path.join(DERIV_DIR,'ld_freqs-plot.png')
-EXPORT_FNAME_STAT = path.join(DERIV_DIR,'ld_freqs-stats.csv')
+EXPORT_FNAME = path.join(DERIV_DIR,'ld_freqs.png')
 
 FIG_WIDTH = 1.75
 FIG_HEIGHT = 3
@@ -48,45 +43,41 @@ df = pd.read_csv(IMPORT_FNAME)
 
 DLQ_COLS = [ f'DLQ01_resp-{i}' for i in range(5) ]
 freqs = df[DLQ_COLS].sum(axis=0).values
-
-####################################
-
-
-##########  stats on the frequencies  ###########
-
-comparisons = ['across_DLQ01','across_nonzeroDLQ01','zeroVSnonzero_DLQ01']
-index = pd.Index(comparisons,name='comparison')
-stats_df = pd.DataFrame(columns=['test','chisq','pval'],index=index)
-
-# Use chi2 to test the difference among a group
-# of proportions, and then pairwise with binomial test.
-
-# is there a difference among the whole DLQ score?
-chisq, p = stats.chisquare(freqs)
-stats_df.loc['across_DLQ01',['test','chisq','pval']] = ['chisquare',chisq,p]
-
-# is there a difference among the lucidity options (non-zero)?
-nonzero_opts = freqs[1:]
-chisq, p = stats.chisquare(nonzero_opts)
-stats_df.loc['across_nonzeroDLQ01',['test','chisq','pval']] = ['chisquare',chisq,p]
-
-# compare if half the nights had LDs or not**
-# but note that we don't really care about this,
-# since we also highlight how it depends on how
-# you measure success. But run this just to be able
-# to say there were about half LDs
 nonlucid = freqs[0]
+nonzero_opts = freqs[1:]
 nonzero_lucid = sum(nonzero_opts)
-obs = [nonlucid,nonzero_lucid]
-p = stats.binom_test(obs,p=0.5,alternative='two-sided')
-stats_df.loc['zeroVSnonzero_DLQ01',['test','chisq','pval']] = ['binomial',np.nan,p]
-
-# export stats dataframe
-stats_df['chisq'] = stats_df['chisq'].astype(float)
-stats_df['pval']  = stats_df['pval'].astype(float)
-stats_df.to_csv(EXPORT_FNAME_STAT,float_format=FLOAT_FMT,index=True)
 
 ####################################
+
+
+# ##########  stats on the frequencies  ###########
+
+# comparisons = ['across_DLQ01','across_nonzeroDLQ01','zeroVSnonzero_DLQ01']
+# index = pd.Index(comparisons,name='comparison')
+# stats_df = pd.DataFrame(columns=['test','chisq','pval'],index=index)
+
+# # Use chi2 to test the difference among a group
+# # of proportions, and then pairwise with binomial test.
+
+# # is there a difference among the whole DLQ score?
+# chisq, p = stats.chisquare(freqs)
+# stats_df.loc['across_DLQ01',['test','chisq','pval']] = ['chisquare',chisq,p]
+
+# # is there a difference among the lucidity options (non-zero)?
+# chisq, p = stats.chisquare(nonzero_opts)
+# stats_df.loc['across_nonzeroDLQ01',['test','chisq','pval']] = ['chisquare',chisq,p]
+
+# # compare if half the nights had LDs or not**
+# # but note that we don't really care about this,
+# # since we also highlight how it depends on how
+# # you measure success. But run this just to be able
+# # to say there were about half LDs
+# obs = [nonlucid,nonzero_lucid]
+# p = stats.binom_test(obs,p=0.5,alternative='two-sided')
+# stats_df.loc['zeroVSnonzero_DLQ01',['test','chisq','pval']] = ['binomial',np.nan,p]
+
+
+# ####################################
 
 
 ##########  draw all frequencies  ###########
@@ -138,7 +129,7 @@ for tic in ax2.xaxis.get_major_ticks():
     tic.tick2line.set_visible(False)
 
 plt.tight_layout()
-plt.savefig(EXPORT_FNAME_PLOT)
+plt.savefig(EXPORT_FNAME)
 plt.close()
 
 ####################################
