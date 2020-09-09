@@ -110,9 +110,9 @@ for ev, subdf in avgs.groupby('eval'):
 
     xvals = np.arange(4).astype(float)
     if ev == 'binary_ld':
-        xvals -= .1
+        xvals -= .125
     elif ev == 'ld_per_night':
-        xvals += .1
+        xvals += .125
     yvals = subdf['mean']
     yerr  = subdf['sem']
 
