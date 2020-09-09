@@ -44,21 +44,18 @@ EXPORT_FNAME_PLOT = path.join(DERIV_DIR,'ld_freqs-cutoffs_plot.png')
 FIG_WIDTH = 3
 FIG_HEIGHT = 3
 
+DLQ_COLS = [ f'DLQ01_resp-{i}' for i in range(5) ]
+RESP_COLS = [ 'No recall' ] + DLQ_COLS
+
+EVALS = ['ld_per_dream','ld_per_night','binary_ld']
+CUTOFFS = [1,2,3,4] # nonzero DLQ1 likert responses
+
 ####################################
 
 
 ########  load and manipulate data  #########
 
 df = pd.read_csv(IMPORT_FNAME,index_col='participant_id')
-
-DLQ_COLS = [ f'DLQ01_resp-{i}' for i in range(5) ]
-RESP_COLS = [ 'No recall' ] + DLQ_COLS
-
-# df['n_nights'] = df.sum(axis=1)
-# df['n_dreams'] = df[DLQ_COLS].sum(axis=1)
-
-EVALS = ['ld_per_dream','ld_per_night','binary_ld']
-CUTOFFS = [1,2,3,4] # nonzero DLQ1 likert responses
 
 for ev in EVALS:
     for c in CUTOFFS:
