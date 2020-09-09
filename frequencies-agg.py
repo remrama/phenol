@@ -108,25 +108,23 @@ ax.spines['right'].set_visible(False)
 ax2 = ax.inset_axes([0.6, 0.6, 0.4, 0.5])
 
 colors = [ myplt.dlqcolor(0), 'gray' ]
-xvals = [1,2]
+xvals = range(2)
 yvals = [nonlucid,nonzero_lucid]
 ax2.bar(xvals,yvals,color=colors,edgecolor='k',width=1,linewidth=.5)
 
-ax2.set_xlim(.25,2.75)
+ax2.set_xlim(-.75,1.75)
 ax2.set_ylim(0,max(yvals)+1)
 ax2.yaxis.set_major_locator(mticker.MultipleLocator(20))
 ax2.yaxis.set_minor_locator(mticker.MultipleLocator(5))
 ax2.set_yticklabels([])
-ax2.set_xticks([1,2])
+ax2.set_xticks([])
 first_ticklabel = list(myplt.DLQ_STRINGS.values())[0]
 second_ticklabel = '>= ' + list(myplt.DLQ_STRINGS.values())[1]
 xticklabels = [first_ticklabel,second_ticklabel]
-ax2.set_xticklabels(xticklabels,rotation=25,ha='right',fontsize=XTICK_FONTSIZE_INSET)
+for i, txt in enumerate(xticklabels):
+    ax2.text(i,0,f'  {txt}',rotation=90,ha='center',va='bottom',fontsize=XTICK_FONTSIZE_INSET)
 ax2.spines['top'].set_visible(False)
 ax2.spines['right'].set_visible(False)
-for tic in ax2.xaxis.get_major_ticks():
-    tic.tick1line.set_visible(False)
-    tic.tick2line.set_visible(False)
 
 plt.tight_layout()
 plt.savefig(EXPORT_FNAME)
