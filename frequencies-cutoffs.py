@@ -19,9 +19,7 @@ import itertools
 
 import numpy as np
 import pandas as pd
-
-from statsmodels.stats.proportion import proportions_ztest
-from statsmodels.stats.multitest import fdrcorrection
+import pingouin as pg
 
 import matplotlib.pyplot as plt; plt.ion()
 from matplotlib import lines as mlines
@@ -51,137 +49,97 @@ FIG_HEIGHT = 3
 
 ########  load and manipulate data  #########
 
-data = pd.read_csv(IMPORT_FNAME,index_col='participant_id')
+df = pd.read_csv(IMPORT_FNAME,index_col='participant_id')
 
-n_reports = data.values.sum() # total number of reports
-n_dreams = data.iloc[:,1:].values.sum() # all reports that include dream recall
-n_subjs = data.shape[0]
+DLQ_COLS = [ f'DLQ01_resp-{i}' for i in range(5) ]
+RESP_COLS = [ 'No recall' ] + DLQ_COLS
 
-# make a dataframe that has both count and proportion
-# for lucidity success based on different criterion.
-# note that this is a cumulative sum thing.
+# df['n_nights'] = df.sum(axis=1)
+# df['n_dreams'] = df[DLQ_COLS].sum(axis=1)
 
-# get the cumulative sum of LDs at each cutoff
-cumsum_cols = np.roll(data.columns.sort_values(ascending=False),-1).tolist()
-cumsum_df = data[cumsum_cols].cumsum(axis=1)
-
-# don't use response of 1 ("Not at all") or "No recall"
-# flip it for interpretability
-DLQ_COLS = [ f'DLQ01_resp-{i}' for i in range(1,5) ]
-
-index = pd.Index(DLQ_COLS,name='cutoff')
-columns = ['dreams_past_cutoff','subjs_past_cutoff']
-
-df = pd.DataFrame(columns=columns,index=index)
-
-df['dreams_past_cutoff'] = cumsum_df[DLQ_COLS].sum(axis=0)
-df['subjs_past_cutoff']  = cumsum_df[DLQ_COLS].astype(bool).sum(axis=0)
-
-totals = dict(reports=n_reports,dreams=n_dreams,subjs=n_subjs)
-
-df['proportion_reports'] = df['dreams_past_cutoff'] / n_reports
-df['proportion_dreams'] = df['dreams_past_cutoff'] / n_dreams
-df['proportion_subjs'] = df['subjs_past_cutoff'] / n_subjs
-
-for col in df.columns:
-    if 'proportion' in col:
-        df[col] = df[col].round(2)
-
-####################################
-
-
-#########  stats  #########
-
-# ztests comparing subject proportions at each cutoff
-
-# build the combinations of evals and cutoffs for 2way tests
-EVALS = ['subjs','dreams','reports']
+EVALS = ['ld_per_dream','ld_per_night','binary_ld']
 CUTOFFS = [1,2,3,4] # nonzero DLQ1 likert responses
-cutoff_combos = itertools.combinations(CUTOFFS,2)
-eval_cutoff_combos = itertools.product(EVALS,cutoff_combos)
-eval_cutoff_combos = [ (x[0],x[1][0],x[1][1])
-                      for x in eval_cutoff_combos ]
-all_combos = [ (f'eval-{e}_resp-{a}',f'eval-{e}_resp-{b}')
-               for e, a, b in eval_cutoff_combos ]
-# add comparisons within each cutoff criterion
-# 3 comparisons within each
-eval_combos = list(itertools.combinations(EVALS,2))
-for c in CUTOFFS:
-    for a, b in eval_combos:
-        all_combos.append( (f'eval-{a}_resp-{c}',f'eval-{b}_resp-{c}') )
 
-# run comparisons
-columns = ['z','p']
-index = pd.MultiIndex.from_tuples(all_combos,names=['proportion_a','proportion_b'])
-stats_df = pd.DataFrame(columns=columns,index=index)
+for ev in EVALS:
+    for c in CUTOFFS:
 
-for conda, condb in stats_df.index:
-    eva, ca = [ x.split('-')[1] for x in conda.split('_') ]
-    evb, cb = [ x.split('-')[1] for x in condb.split('_') ]
-    indxa = f'DLQ01_resp-{ca}'
-    indxb = f'DLQ01_resp-{cb}'
-    col_keya = 'dreams' if eva == 'reports' else eva
-    col_keyb = 'dreams' if evb == 'reports' else evb
-    cola = f'{col_keya}_past_cutoff'
-    colb = f'{col_keyb}_past_cutoff'
-    freqa = df.loc[indxa,cola]
-    freqb = df.loc[indxb,colb]
-    nobs_a = totals[eva]
-    nobs_b = totals[evb]
-    freqs = [freqa,freqb]
-    n_obs = [nobs_a,nobs_b]
-    z, p = proportions_ztest(freqs,n_obs)
-    stats_df.loc[ (conda,condb), ['z','p'] ] = z, p
+        # pick which columns represent a lucid dream
+        lucid_cols = DLQ_COLS[c:]
 
-pvals = stats_df['p']
-_, p_corr = fdrcorrection(pvals,method='indep',is_sorted=False)
-stats_df['p_corr'] = p_corr
+        n_lucids = df[lucid_cols].sum(axis=1)
 
-# export data and results dataframes
-# round values while also changing output format to print full values
-for col in ['z','p','p_corr']:
-    stats_df[col] = stats_df[col].astype(float)
-df.to_csv(EXPORT_FNAME_DATA,float_format=FLOAT_FMT,index=True)
-stats_df.to_csv(EXPORT_FNAME_STAT,float_format=FLOAT_FMT,index=True)
+        new_col = f'{ev}-cutoff_{c}'
+
+        if ev == 'binary_ld':
+            df[new_col] = (n_lucids > 0).astype(float)
+        elif ev == 'ld_per_dream':
+            df[new_col] = (n_lucids / df[DLQ_COLS].sum(axis=1)).fillna(0)
+        elif ev == 'ld_per_night':
+            df[new_col] = (n_lucids / df[RESP_COLS].sum(axis=1)).fillna(0)
+
+
+# break into long format and groupby evaluation/cutoff
+
+melted = pd.melt(df.reset_index(),
+    value_vars=[ c for c in df.columns if 'cutoff' in c ],
+    id_vars='participant_id',
+    value_name='ld_rate')
+
+melted['eval'], melted['cutoff'] = zip(*melted['variable'].str.split('-'))
+avgs = melted.groupby(['eval','cutoff']
+    )['ld_rate'].agg(['mean','sem'])
+
+anova = pg.rm_anova(data=melted,dv='ld_rate',
+    within=['eval','cutoff'],subject='participant_id',
+    detailed=True)
+
+avgs.to_csv(EXPORT_FNAME_DATA,float_format=FLOAT_FMT,index=True)
+anova.to_csv(EXPORT_FNAME_STAT,float_format=FLOAT_FMT,index=False)
 
 ####################################
 
 
 #########  draw plot  #########
 
-markers = dict(reports='s',dreams='o',subjs='^')
-labels = dict(reports=f'All reports ($\mathit{{n}}$={n_reports})',
-              dreams=f'Recalled dreams ($\mathit{{n}}$={n_dreams})',
-              subjs=f'Subjects ($\mathit{{n}}$={n_subjs})')
+markers = dict(ld_per_dream='s',ld_per_night='o',binary_ld='^')
+labels = dict(binary_ld='1 or more',
+              ld_per_dream='per dream',
+              ld_per_night='per night')
 
 fig, ax = plt.subplots(figsize=(FIG_WIDTH,FIG_HEIGHT))
 
 # draw lines and points separately to have diff colored points
-for col in df.columns:
-    if 'proportion' in col:
-        key = col.split('_')[1]
-        yvals = df[col].values
-        ax.plot(range(1,5),yvals,
-            color='k',linestyle='-',linewidth=1,zorder=1)
-        ax.scatter(range(1,5),yvals,
-            color=[ myplt.dlqcolor(i) for i in range(1,5) ],
-            marker=markers[key],edgecolors='w',
-            s=50,zorder=2,linewidths=.5)
+for ev, subdf in avgs.groupby('eval'):
+
+    xvals = np.arange(4).astype(float)
+    if ev == 'binary_ld':
+        xvals -= .1
+    elif ev == 'ld_per_night':
+        xvals += .1
+    yvals = subdf['mean']
+    yerr  = subdf['sem']
+
+    ax.errorbar(xvals,yvals,yerr,
+        color='k',linestyle='-',linewidth=.5,zorder=1)
+    ax.scatter(xvals,yvals,
+        color=[ myplt.dlqcolor(i) for i in range(1,5) ],
+        marker=markers[ev],edgecolors='w',
+        s=70,zorder=2,linewidths=1)
 
 # handle the xaxis
-ax.set_xticks(range(1,5))
+ax.set_xticks(range(4))
 xticklabels = [ myplt.DLQ_STRINGS[i] for i in range(1,5) ]
 xticklabels = [ x if x == 'Very much' else f'>= {x}'
                 for x in xticklabels ]
 ax.set_xticklabels(xticklabels,rotation=25,ha='right')
-ax.set_xlabel('Lucid dream criterion')
+ax.set_xlabel('Lucidity cutoff')
 
 # handle yaxes
 ax.yaxis.set_major_locator(mticker.MultipleLocator(.5))
 ax.yaxis.set_minor_locator(mticker.MultipleLocator(.1))
-ax.set_xlim(0.5,4.5)
+ax.set_xlim(-0.5,3.5)
 ax.set_ylim(0,1)
-ax.set_ylabel('Lucidity induction success')
+ax.set_ylabel('Lucid dream frequency')
 # ax.set_yticklabels(major_yticklabels)
 ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
