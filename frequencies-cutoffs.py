@@ -86,11 +86,14 @@ melted['eval'], melted['cutoff'] = zip(*melted['variable'].str.split('-'))
 avgs = melted.groupby(['eval','cutoff']
     )['ld_rate'].agg(['mean','sem'])
 
-anova = pg.rm_anova(data=melted,dv='ld_rate',
-    within=['eval','cutoff'],subject='participant_id',
-    detailed=True)
+# replace sem for the binary case bc it's meaningless
+avgs.loc['binary_ld','sem'] = pd.NA
 
-avgs.to_csv(EXPORT_FNAME_DATA,float_format=FLOAT_FMT,index=True)
+anova = pg.rm_anova(data=melted[melted['eval']!='binary_ld'],
+    dv='ld_rate',within=['eval','cutoff'],
+    subject='participant_id',detailed=True)
+
+avgs.to_csv(EXPORT_FNAME_DATA,float_format=FLOAT_FMT,index=True,na_rep='NA')
 anova.to_csv(EXPORT_FNAME_STAT,float_format=FLOAT_FMT,index=False)
 
 ####################################
@@ -99,9 +102,9 @@ anova.to_csv(EXPORT_FNAME_STAT,float_format=FLOAT_FMT,index=False)
 #########  draw plot  #########
 
 markers = dict(ld_per_dream='s',ld_per_night='o',binary_ld='^')
-labels = dict(binary_ld='1 or more',
-              ld_per_dream='per dream',
-              ld_per_night='per night')
+labels = dict(ld_per_night='LDs per night',
+              ld_per_dream='LDs per night with recall',
+              binary_ld='Binarized rate')
 
 fig, ax = plt.subplots(figsize=(FIG_WIDTH,FIG_HEIGHT))
 
@@ -109,15 +112,19 @@ fig, ax = plt.subplots(figsize=(FIG_WIDTH,FIG_HEIGHT))
 for ev, subdf in avgs.groupby('eval'):
 
     xvals = np.arange(4).astype(float)
-    if ev == 'binary_ld':
-        xvals -= .125
-    elif ev == 'ld_per_night':
-        xvals += .125
+    if ev == 'ld_per_night':
+        xvals -= .07
+    elif ev == 'ld_per_dream':
+        xvals += .07
     yvals = subdf['mean']
-    yerr  = subdf['sem']
 
-    ax.errorbar(xvals,yvals,yerr,
-        color='k',linestyle='-',linewidth=.5,zorder=1)
+    if ev != 'binary_ld':
+        yerr  = subdf['sem']
+        ax.errorbar(xvals,yvals,yerr,
+            color='k',linestyle='-',linewidth=.5,zorder=1)
+    else:
+        ax.plot(xvals,yvals,
+            color='k',linestyle='-',linewidth=.5,zorder=1)
     ax.scatter(xvals,yvals,
         color=[ myplt.dlqcolor(i) for i in range(1,5) ],
         marker=markers[ev],edgecolors='w',
