@@ -50,6 +50,11 @@ RESP_COLS = [ 'No recall' ] + DLQ_COLS
 EVALS = ['ld_per_dream','ld_per_night','binary_ld']
 CUTOFFS = [1,2,3,4] # nonzero DLQ1 likert responses
 
+MARKERS = dict(ld_per_dream='s',ld_per_night='o',binary_ld='^')
+LABELS = dict(ld_per_night='LDs per night',
+              ld_per_dream='LDs per night with recall',
+              binary_ld='Participants with >0 LDs')
+
 ####################################
 
 
@@ -101,10 +106,6 @@ anova.to_csv(EXPORT_FNAME_STAT,float_format=FLOAT_FMT,index=False)
 
 #########  draw plot  #########
 
-markers = dict(ld_per_dream='s',ld_per_night='o',binary_ld='^')
-labels = dict(ld_per_night='LDs per night',
-              ld_per_dream='LDs per night with recall',
-              binary_ld='Binarized rate')
 
 fig, ax = plt.subplots(figsize=(FIG_WIDTH,FIG_HEIGHT))
 
@@ -127,7 +128,7 @@ for ev, subdf in avgs.groupby('eval'):
             color='k',linestyle='-',linewidth=.5,zorder=1)
     ax.scatter(xvals,yvals,
         color=[ myplt.dlqcolor(i) for i in range(1,5) ],
-        marker=markers[ev],edgecolors='w',
+        marker=MARKERS[ev],edgecolors='w',
         s=70,zorder=2,linewidths=1)
 
 # handle the xaxis
@@ -153,9 +154,9 @@ ax.grid(True,axis='y',which='both',
 
 # legend for markers
 legend_patches = [ mlines.Line2D([],[],
-                    label=label,marker=markers[key],
+                    label=label,marker=MARKERS[key],
                     color='gray',linestyle='none')
-                for key, label in labels.items() ]
+                for key, label in LABELS.items() ]
 leg = ax.legend(handles=legend_patches,loc='upper right',
           title='Evaluation',frameon=True,framealpha=1,edgecolor='k',
           handletextpad=-0.2, # space between legend marker and label
