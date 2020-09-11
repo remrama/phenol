@@ -18,10 +18,10 @@ with open('./config.json') as f:
     DERIV_DIR = path.expanduser(p['derivatives_directory'])
 
 IMPORT_FNAME = path.join(DERIV_DIR,'adherence-probs.csv')
-EXPORT_FNAME = IMPORT_FNAME.replace('.csv','.png')
+EXPORT_FNAME = IMPORT_FNAME.replace('.csv','.svg')
 
-FIG_WIDTH = 3.5
-FIG_HEIGHT = 3.5
+FIG_WIDTH = 2.5
+FIG_HEIGHT = 2.5
 
 ######################################
 
@@ -55,15 +55,16 @@ ax.set_yticks([0,1])
 ax.xaxis.set_major_locator(mticker.MultipleLocator(20))
 ax.xaxis.set_minor_locator(mticker.MultipleLocator(5))
 ax.set_xlabel('MILD rehearsal length (minutes)')
-ax.set_ylabel('Probability of reaching lucidity level')
+ax.set_ylabel('Probability of lucidity')
 
-ax.legend(handles=myplt.dlqpatches,loc='lower left',
+leg = ax.legend(handles=myplt.dlqpatches,loc='lower left',
           title='Lucidity',
           frameon=False,
           title_fontsize=9,fontsize=7,
-          labelspacing=0.4, # vertical space between the legend entries
-          borderaxespad=1,
+          labelspacing=0.2, # vertical space between the legend entries
+          borderaxespad=0,
 )
+leg._legend_box.align = "left"
 
 plt.tight_layout()
 plt.savefig(EXPORT_FNAME)

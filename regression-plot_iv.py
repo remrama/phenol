@@ -22,7 +22,7 @@ with open('./config.json') as f:
     DERIV_DIR = path.expanduser(p['derivatives_directory'])
 
 IMPORT_FNAME = path.join(DATA_DIR,'data.csv')
-EXPORT_FNAME = path.join(DERIV_DIR,'adherence.png')
+EXPORT_FNAME = path.join(DERIV_DIR,'adherence.svg')
 
 PREDICTORS = ['n_reality_checks','MILD_rehearsal_min','MILD_awake_min']
 XLABELS = dict(
@@ -43,8 +43,8 @@ XTICKS_MINOR = dict(
 
 PALETTE = { x: myplt.dlqcolor(x) for x in myplt.DLQ_STRINGS.keys() }
 
-FIG_HEIGHT = 2
-FIG_WIDTH = 1.75*len(PREDICTORS)
+FIG_HEIGHT = 2.5
+FIG_WIDTH = 1.5*len(PREDICTORS)
 
 ###################################
 

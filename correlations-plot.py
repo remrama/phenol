@@ -34,8 +34,8 @@ IMPORT_FNAME_DATA = path.join(DATA_DIR,'data.csv')
 IMPORT_FNAME_CORR = path.join(DERIV_DIR,'correlates_withz.csv')
 IMPORT_FNAME_STAT = path.join(DERIV_DIR,'correlates-stats.csv')
 
-EXPORT_FNAME_1 = path.join(DERIV_DIR,'correlates-plot.png')
-EXPORT_FNAME_2 = path.join(DERIV_DIR,'correlates-plot_zs.png')
+EXPORT_FNAME_1 = path.join(DERIV_DIR,'correlates-plot.svg')
+EXPORT_FNAME_2 = path.join(DERIV_DIR,'correlates-plot_zs.svg')
 
 XLABEL_DICT = {
     'CHAR_sensory'       : 'Dream sensory vividness',
@@ -96,8 +96,8 @@ correlated_vars = statdf.index
 n_axes = len(correlated_vars)
 n_rows = 3
 n_cols = int(np.ceil(n_axes/n_rows))
-height = 1.8 * n_rows
-width = 1.8 * n_cols
+height = 1.5 * n_rows
+width = 1.5 * n_cols
 
 fig, axes = plt.subplots(n_rows,n_cols,figsize=(width,height),
                          squeeze=False,sharex=False,sharey=False)
@@ -164,15 +164,15 @@ plt.close()
 
 n_violins = n_axes
 width = .4 * n_violins
-fig, ax = plt.subplots(figsize=(width,3))
+fig, ax = plt.subplots(figsize=(width,2.2))
 
-ymin, ymax = -2.2, 2.2
+ymin, ymax = -1.2, 2.2
 
 violin_data = [ rsmpdf.loc[var,'fishz'].values for var in correlated_vars ]
 viols = ax.violinplot(violin_data,positions=range(n_violins),
                       widths=np.repeat(.5,n_violins),
                       showextrema=False)
-plt.setp(viols['bodies'],facecolor='gray',edgecolor='white')
+plt.setp(viols['bodies'],facecolor='gainsboro',edgecolor='white',alpha=1)
 
 # add error bars of 95% CI
 for x, var in enumerate(correlated_vars):
@@ -200,7 +200,7 @@ ax.spines['right'].set_visible(False)
 
 ax.set_xticks(range(n_violins))
 xticklabels = [ XLABEL_DICT[var] for var in correlated_vars ]
-ax.set_xticklabels(xticklabels,rotation=33,ha='right')
+ax.set_xticklabels(xticklabels,rotation=25,ha='right')
 ax.set_xlim(-.5,n_violins-.5)
 
 plt.tight_layout()

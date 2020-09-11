@@ -26,7 +26,7 @@ with open('./config.json') as f:
 
 IMPORT_FNAME = path.join(DERIV_DIR,'ld_freqs.csv')
 
-EXPORT_FNAME = path.join(DERIV_DIR,'ld_freqs.png')
+EXPORT_FNAME = path.join(DERIV_DIR,'ld_freqs.svg')
 
 FIG_WIDTH = 1.75
 FIG_HEIGHT = 3

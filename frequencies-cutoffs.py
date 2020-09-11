@@ -39,7 +39,7 @@ IMPORT_FNAME = path.join(DERIV_DIR,'ld_freqs.csv')
 
 EXPORT_FNAME_DATA = path.join(DERIV_DIR,'ld_freqs-cutoffs_data.csv')
 EXPORT_FNAME_STAT = path.join(DERIV_DIR,'ld_freqs-cutoffs_stats.csv')
-EXPORT_FNAME_PLOT = path.join(DERIV_DIR,'ld_freqs-cutoffs_plot.png')
+EXPORT_FNAME_PLOT = path.join(DERIV_DIR,'ld_freqs-cutoffs_plot.svg')
 
 FIG_WIDTH = 3
 FIG_HEIGHT = 3

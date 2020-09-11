@@ -28,7 +28,7 @@ with open('./config.json') as f:
 
 DATA_FNAME = path.join(DATA_DIR,'data.csv')
 
-PLOT_FNAME  = path.join(DERIV_DIR,'dlq.png')
+PLOT_FNAME  = path.join(DERIV_DIR,'dlq.eps')
 TABLE_FNAME = path.join(DERIV_DIR,'dlq.csv')
 
 FIGURE_WIDTH = 6
@@ -84,13 +84,12 @@ for i, (ax,data) in enumerate(zip(axes,[plot_data_all,plot_data_lim])):
     ax.grid(True,axis='x',which='major',linestyle='--',
             linewidth=.25,color='k',alpha=1)
     if i==0:
-        ax.set_title('All dream reports\n',fontsize=TITLE_FONTSIZE)
+        ax.set_title('All dream reports\n')
         yticklabels = [ f'{x} ({i+1:02d})' for i, x in enumerate(DLQ_STRINGS) ]
-        ax.set_yticklabels(yticklabels,rotation=0,fontsize=YTICK_FONTSIZE)
-        ax.set_xticklabels(list(myplt.DLQ_STRINGS.values()),rotation=25,
-                           ha='right',fontsize=XTICK_FONTSIZE)
+        ax.set_yticklabels(yticklabels,rotation=0)
+        ax.set_xticklabels(list(myplt.DLQ_STRINGS.values()),rotation=25,ha='right')
     elif i==1:
-        ax.set_title('Dream reports\nwith nonzero lucidity',fontsize=TITLE_FONTSIZE)
+        ax.set_title('Dream reports\nwith nonzero lucidity')
         ax.set_yticklabels([])
         ax.set_xticklabels([])
     ax.invert_yaxis() # flip so DLQ1 is on top
