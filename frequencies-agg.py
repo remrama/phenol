@@ -119,7 +119,7 @@ ax2.yaxis.set_minor_locator(mticker.MultipleLocator(5))
 ax2.set_yticklabels([])
 ax2.set_xticks([])
 first_ticklabel = list(myplt.DLQ_STRINGS.values())[0]
-second_ticklabel = '>= ' + list(myplt.DLQ_STRINGS.values())[1]
+second_ticklabel = 'Nonzero lucidity'
 xticklabels = [first_ticklabel,second_ticklabel]
 for i, txt in enumerate(xticklabels):
     ax2.text(i,0,f'  {txt}',rotation=90,ha='center',va='bottom',fontsize=XTICK_FONTSIZE_INSET)
