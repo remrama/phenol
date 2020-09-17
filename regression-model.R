@@ -34,6 +34,8 @@ sink(EXPORT_FNAME_STATSPRINT)
 
 data <- read.csv(IMPORT_FNAME,na.strings="NA")
 # only use those rows with dream recall
+### Note this was commented out for original stat presented in paper
+### (we present it both ways, explained in Methods section)
 data = data[!is.na(data$dream_report),]
 
 # make sure factors are factors
